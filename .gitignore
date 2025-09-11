@@ -1,0 +1,21 @@
+# Environment variables
+.env
+
+# Python virtual environment
+venv/
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+
+# Logs
+*.log
+
+# Databases
+.db/
+db/
+
+# Sensitive information
+messages/
+personal_info/
