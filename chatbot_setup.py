@@ -92,7 +92,8 @@ class PineconeVectorStore:
         # This is not ideal for semantic search but will work for demonstration
         # In production, you'd want to use a proper embedding model
         np.random.seed(hash(text) % 2**32)
-        return list(np.random.rand(768).astype(float))
+        # Convert numpy float64 values to native Python floats
+        return [float(x) for x in np.random.rand(768)]
     
     def add_documents(self, messages):
         """Add messages to the vector store."""
@@ -232,23 +233,13 @@ def process_messages():
     logger.info(f"Created vector store with {len(messages)} messages")
 
 class Tools:
-    """Tools that can be called by the chatbot."""
+    """Helper tools for the chatbot."""
     
     @staticmethod
     def get_current_time():
         """Get the current time."""
         now = datetime.now()
         return now.strftime("%Y-%m-%d %H:%M:%S")
-    
-    @staticmethod
-    def get_portfolio_link():
-        """Get Samim's portfolio link."""
-        return "https://samim-reza.github.io/"
-    
-    @staticmethod
-    def get_cv_link():
-        """Get Samim's CV link."""
-        return "https://samim-reza.github.io/CV_Samim_Reza.pdf"
     
     @staticmethod
     def search_personal_info(query):
@@ -287,88 +278,122 @@ class SamimChatbot:
     def __init__(self):
         """Initialize the chatbot."""
         try:
-            self.vector_store = PineconeVectorStore(namespace="messages")
+            # Initialize the vector store connection
+            # This will be used for searching, not for initialization
+            pass
         except Exception as e:
             logger.error(f"Error initializing vector store: {e}")
             raise ValueError("Vector store not found or invalid. Run process_messages.py first.")
         
         self.api_key = GROQ_API_KEY
-        self.tools = Tools()
-        
-        # Define available tools
-        self.available_tools = [
-            {
-                "type": "function",
-                "function": {
-                    "name": "get_current_time",
-                    "description": "Get the current time and date",
-                    "parameters": {}
-                }
-            },
-            {
-                "type": "function",
-                "function": {
-                    "name": "get_portfolio_link",
-                    "description": "Get Samim's portfolio website link",
-                    "parameters": {}
-                }
-            },
-            {
-                "type": "function",
-                "function": {
-                    "name": "get_cv_link",
-                    "description": "Get Samim's CV or resume link",
-                    "parameters": {}
-                }
-            },
-            {
-                "type": "function",
-                "function": {
-                    "name": "search_personal_info",
-                    "description": "Search for specific information in Samim's personal data",
-                    "parameters": {
-                        "type": "object",
-                        "properties": {
-                            "query": {
-                                "type": "string",
-                                "description": "The search query to look for in personal information"
-                            }
-                        },
-                        "required": ["query"]
-                    }
-                }
-            }
-        ]
     
-    def _execute_tool_call(self, tool_call):
-        """Execute a tool call and return the result."""
+    def get_from_vector_store(self, user_query, namespace="personal_info", k=5):
+        """Retrieve relevant information from the vector store."""
         try:
-            function_name = tool_call["function"]["name"]
+            # Create a vector store instance
+            store = PineconeVectorStore(namespace=namespace)
             
-            if function_name == "get_current_time":
-                return self.tools.get_current_time()
+            # Search for relevant information
+            results = store.search(user_query, k=k)
+            
+            # Define contact-related titles for matching
+            contact_titles = {
+                "linkedin": ["LinkedIn Link", "LinkedIn", "linkedin"],
+                "github": ["GitHub Link", "GitHub", "github"],
+                "facebook": ["Facebook Link", "Facebook", "facebook"],
+                "email": ["Contact Email", "Email", "email", "ইমেইল"],
+                "cv": ["CV Link", "CV", "Resume", "resume"],
+                "portfolio": ["Portfolio Link", "Portfolio", "Website", "website", "ওয়েবসাইট"],
+                "contact": ["Contact", "যোগাযোগ", "contact information", "Contact Information"]
+            }
+            
+            user_query_lower = user_query.lower()
+            
+            # Check for specific contact query
+            for keyword, titles in contact_titles.items():
+                if any(term in user_query_lower for term in [keyword, *titles]):
+                    # Find matches for this specific contact type
+                    matches = []
+                    for result in results:
+                        content = result.content.lower()
+                        # Check if any title matches and the content contains a URL or email
+                        if any(title.lower() in content for title in titles) and any(pattern in content for pattern in ["http", "www.", "@", ".com"]):
+                            matches.append(result.content)
+                    
+                    if matches:
+                        return "\n\n".join(matches)
+                    else:
+                        # Try a more specific search with higher k
+                        specific_results = store.search(keyword, k=10)
+                        for result in specific_results:
+                            content = result.content.lower()
+                            if any(title.lower() in content for title in titles) and any(pattern in content for pattern in ["http", "www.", "@", ".com"]):
+                                matches.append(result.content)
+                        
+                        if matches:
+                            return "\n\n".join(matches)
+            
+            # For general contact/links query
+            if any(term in user_query_lower for term in ["যোগাযোগ", "contact", "link", "লিংক", "links", "profiles", "social", "প্রোফাইল", "profile"]):
+                all_contacts = []
+                # Check all results for any contact info
+                for result in results:
+                    content = result.content.lower()
+                    # Add if it contains a URL or email pattern and has a contact-related keyword
+                    if any(pattern in content for pattern in ["http", "www.", "@", ".com"]):
+                        for keyword, titles in contact_titles.items():
+                            if any(title.lower() in content for title in titles):
+                                all_contacts.append(result.content)
+                                break
                 
-            elif function_name == "get_portfolio_link":
-                return self.tools.get_portfolio_link()
-                
-            elif function_name == "get_cv_link":
-                return self.tools.get_cv_link()
-                
-            elif function_name == "search_personal_info":
-                args = json.loads(tool_call["function"]["arguments"])
-                query = args.get("query", "")
-                return json.dumps(self.tools.search_personal_info(query))
-                
-            else:
-                return f"Unknown tool: {function_name}"
+                if all_contacts:
+                    return "\n\n".join(all_contacts)
+            
+            # Return all relevant results if no specific contact info was found
+            if results:
+                return "\n\n".join([result.content for result in results])
                 
         except Exception as e:
-            logger.error(f"Error executing tool call: {e}")
-            return f"Error executing tool: {str(e)}"
-    
+            logger.error(f"Error searching vector store: {e}")
+            
+        return None
+
     def get_response(self, user_query):
         """Get a response from the chatbot for a user query."""
         try:
+            # Convert to lowercase once for efficiency
+            user_query_lower = user_query.lower()
+            
+            # Use pure RAG (Retrieval-Augmented Generation) approach
+            # Define keywords to check for specific information types
+            contact_keywords = {
+                "linkedin": ["LinkedIn Link", "linkedin", "লিঙ্কডিন"],
+                "github": ["GitHub Link", "github"],
+                "facebook": ["Facebook Link", "facebook"],
+                "email": ["Contact Email", "email", "mail", "ইমেইল"],
+                "cv": ["CV Link", "cv", "resume"],
+                "portfolio": ["Portfolio Link", "portfolio", "website", "ওয়েবসাইট"],
+                "contact": ["contact", "যোগাযোগ", "লিংক", "link", "প্রোফাইল", "profile"]
+            }
+            
+            # For simple greetings and conversational queries, use the API directly
+            simple_greetings = ["hi", "hello", "hey", "কেমন আছো", "কেমন আছেন", "হ্যালো", "হাই", "how are you", "what's up", "sup"]
+            if any(greeting in user_query_lower for greeting in simple_greetings) and len(user_query_lower.split()) < 5:
+                # Don't use direct vector retrieval for conversational queries
+                # Let the API handle these with context
+                pass
+            
+            # Don't return raw vector data for simple queries
+            elif len(user_query_lower.split()) >= 3:  # If this is a more substantive query
+                # Check for specific keyword matches
+                for category, keywords in contact_keywords.items():
+                    if any(kw in user_query_lower for kw in keywords):
+                        # Get vector response but don't return directly
+                        vector_response = self.get_from_vector_store(category, k=3)
+                        if vector_response:
+                            # Save it for API context instead of returning directly
+                            break
+            
             # Create two vector stores for different namespaces
             messages_store = PineconeVectorStore(namespace="messages")
             personal_info_store = PineconeVectorStore(namespace="personal_info")
@@ -393,15 +418,15 @@ class SamimChatbot:
                     - Three-time ICPC regionalist with 1000+ problems solved on various online judges
                     - Currently serving as a Teaching Assistant, Programming Trainer, and Robotics Engineer Intern
                     - Technical expertise includes various programming languages, robotics technologies including ROS, embedded systems, and IoT development
-                    - the correct spelling of the Samim name in bengali is "শামীম"
+                    - The correct spelling of Samim's name in Bengali is "শামীম"
                     
                     When responding:
                     - Be professional but friendly and conversational
                     - Always provide specific information from the context when available
                     - Use Samim's style: casual, preferring to respond in Bengali (Bangla) or mixing Bengali and English
-                    - If asked about links, contacts or other personal information, use the appropriate tool to fetch that information
-                    - For truly missing information that doesn't appear in the context at all, politely suggest contacting Samim directly
-                    - When you need specific information about Samim, use the tools available to you"""
+                    - When asked for contact information, use ONLY the information provided in the context
+                    - Don't make up any contact information that's not in the context
+                    """
                 },
                 {
                     "role": "user",
@@ -412,7 +437,7 @@ class SamimChatbot:
                 }
             ]
             
-            # Use Groq API directly with requests and tools
+            # Use Groq API directly with simple requests (no tools)
             headers = {
                 "Authorization": f"Bearer {self.api_key}",
                 "Content-Type": "application/json"
@@ -422,9 +447,7 @@ class SamimChatbot:
                 "messages": messages,
                 "model": "openai/gpt-oss-20b",
                 "max_tokens": 1024,
-                "temperature": 0.5,
-                "tools": self.available_tools,
-                "tool_choice": "auto"
+                "temperature": 0.5
             }
             
             response = requests.post(
@@ -433,53 +456,86 @@ class SamimChatbot:
                 json=payload
             )
             
-            if response.status_code == 200:
-                response_data = response.json()
-                assistant_message = response_data["choices"][0]["message"]
+            try:
+                if response.status_code == 200:
+                    response_data = response.json()
+                    assistant_message = response_data["choices"][0]["message"]
+                    return assistant_message["content"]
+                else:
+                    logger.error(f"Error from Groq API: {response.status_code} - {response.text}")
+                    raise Exception("API error")
+            except Exception as e:
+                logger.error(f"Error processing response: {e}")
                 
-                # Check if tool calls are present
-                if "tool_calls" in assistant_message:
-                    tool_calls = assistant_message["tool_calls"]
-                    
-                    # Execute each tool call
-                    for tool_call in tool_calls:
-                        tool_result = self._execute_tool_call(tool_call)
+                # Handle greetings specially instead of returning raw data
+                simple_greetings = ["hi", "hello", "hey", "কেমন আছো", "কেমন আছেন", "হ্যালো", "হাই", "how are you", "what's up", "sup"]
+                if any(greeting in user_query_lower for greeting in simple_greetings) and len(user_query_lower.split()) < 5:
+                    return "হ্যালো! আমি শামীমের পার্সোনাল AI অ্যাসিস্ট্যান্ট। আপনি কেমন আছেন? আমি আপনাকে কিভাবে সাহায্য করতে পারি?"
+                
+                # For contact queries, we need to extract specific information from vector results
+                contact_keywords = [
+                    "linkedin", "github", "facebook", "email", "mail", "cv", "resume", 
+                    "portfolio", "website", "contact", "যোগাযোগ", "লিঙ্কডিন", "ইমেইল"
+                ]
+                
+                # Check which keywords are in the query
+                matching_keywords = [kw for kw in contact_keywords if kw in user_query_lower]
+                
+                if matching_keywords:
+                    # For specific platform queries, craft a better response with the link
+                    for keyword in matching_keywords:
+                        raw_result = self.get_from_vector_store(keyword, k=5)
+                        if raw_result:
+                            # Extract URLs from the result
+                            import re
+                            urls = re.findall(r'https?://[^\s]+', raw_result)
+                            emails = re.findall(r'\S+@\S+\.\S+', raw_result)
+                            
+                            if urls or emails:
+                                link = urls[0] if urls else emails[0] if emails else None
+                                if link:
+                                    # Return a proper formatted response
+                                    if "linkedin" in keyword:
+                                        return f"শামীমের LinkedIn প্রোফাইল লিংক হলো: {link}"
+                                    elif "github" in keyword:
+                                        return f"শামীমের GitHub প্রোফাইল লিংক হলো: {link}"
+                                    elif "facebook" in keyword:
+                                        return f"শামীমের Facebook প্রোফাইল লিংক হলো: {link}" 
+                                    elif "email" in keyword or "mail" in keyword or "ইমেইল" in keyword:
+                                        return f"শামীমের ইমেইল হলো: {link}"
+                                    elif "cv" in keyword or "resume" in keyword:
+                                        return f"শামীমের CV ডাউনলোড করতে পারেন এখান থেকে: {link}"
+                                    elif "portfolio" in keyword or "website" in keyword:
+                                        return f"শামীমের পোর্টফোলিও ওয়েবসাইট: {link}"
+                                    else:
+                                        return f"এই তথ্যটি আপনার জন্য উপযোগী হতে পারে: {link}"
+                
+                    # Generic contact information request
+                    contact_info = self.get_from_vector_store("contact information", k=5)
+                    if contact_info:
+                        # Extract all links and return a formatted response
+                        import re
+                        urls = re.findall(r'https?://[^\s]+', contact_info)
+                        emails = re.findall(r'\S+@\S+\.\S+', contact_info)
                         
-                        # Add the tool call and result to messages
-                        messages.append(assistant_message)
-                        messages.append({
-                            "role": "tool",
-                            "tool_call_id": tool_call["id"],
-                            "name": tool_call["function"]["name"],
-                            "content": tool_result
-                        })
+                        response = "শামীমের সাথে যোগাযোগ করার জন্য:"
+                        if emails:
+                            response += f"\n\nইমেইল: {emails[0]}"
+                        if urls:
+                            for url in urls[:3]:  # Limit to first 3 URLs
+                                if "linkedin" in url:
+                                    response += f"\nLinkedIn: {url}"
+                                elif "github" in url:
+                                    response += f"\nGitHub: {url}"
+                                elif "facebook" in url:
+                                    response += f"\nFacebook: {url}"
+                                else:
+                                    response += f"\nওয়েবসাইট: {url}"
+                        
+                        return response
                     
-                    # Make a follow-up request with the tool results
-                    payload = {
-                        "messages": messages,
-                        "model": "openai/gpt-oss-20b",
-                        "max_tokens": 1024,
-                        "temperature": 0.5
-                    }
-                    
-                    response = requests.post(
-                        "https://api.groq.com/openai/v1/chat/completions",
-                        headers=headers,
-                        json=payload
-                    )
-                    
-                    if response.status_code == 200:
-                        final_response = response.json()
-                        return final_response["choices"][0]["message"]["content"]
-                    else:
-                        logger.error(f"Error from Groq API (follow-up): {response.status_code} - {response.text}")
-                        return "I'm sorry, there was an error connecting to my language model. Please try again later."
-                
-                # If no tool calls were made, return the original response
-                return assistant_message["content"]
-            else:
-                logger.error(f"Error from Groq API: {response.status_code} - {response.text}")
-                return "I'm sorry, there was an error connecting to my language model. Please try again later."
+                # As a last resort, return a message that guides without hardcoding
+                return "দুঃখিত, আমি এই মুহূর্তে আপনার প্রশ্নের উত্তর দিতে পারছি না। আপনি শামীমের সাথে যোগাযোগের তথ্য জানতে 'contact information' লিখে জিজ্ঞাসা করতে পারেন।"
         
         except Exception as e:
             logger.error(f"Error getting response: {e}")
@@ -544,6 +600,60 @@ def view_vector_db():
     except Exception as e:
         print(f"Error accessing vector database: {e}")
 
+def check_pinecone_data():
+    """Check if data is stored in Pinecone and print stats about it."""
+    try:
+        from pinecone import Pinecone
+        
+        # Initialize Pinecone client
+        pc = Pinecone(api_key=PINECONE_API_KEY)
+        
+        # List all indexes
+        indexes = pc.list_indexes()
+        print(f"\nPinecone indexes in your account: {indexes}")
+        
+        # Get the chatbot index
+        try:
+            index = pc.Index("my-chat-bot")
+            
+            # Get overall stats
+            stats = index.describe_index_stats()
+            total_vector_count = stats.total_vector_count
+            print(f"\nTotal vectors in index: {total_vector_count}")
+            
+            # Check each namespace
+            print("\nNamespace statistics:")
+            if hasattr(stats, 'namespaces'):
+                for namespace_name, namespace_data in stats.namespaces.items():
+                    vector_count = namespace_data.vector_count if hasattr(namespace_data, 'vector_count') else 0
+                    print(f"  - {namespace_name}: {vector_count} vectors")
+                    
+                    # Fetch a small sample from this namespace
+                    if vector_count > 0:
+                        print(f"\n    Sample vectors from '{namespace_name}':")
+                        random_vector = list(np.random.rand(768).astype(float))
+                        results = index.query(
+                            vector=random_vector,
+                            top_k=2,
+                            namespace=namespace_name,
+                            include_metadata=True
+                        )
+                        
+                        for i, match in enumerate(results.matches):
+                            metadata = match.metadata if hasattr(match, 'metadata') else {}
+                            sender = metadata.get('sender', 'Unknown')
+                            content = metadata.get('content', '')[:50]
+                            print(f"    {i+1}. Sender: {sender} | Content: {content}...")
+            else:
+                print("  No namespace data found")
+            
+        except Exception as e:
+            print(f"Error accessing Pinecone index: {e}")
+    
+    except ImportError:
+        print("Pinecone package is not installed. Run: pip install pinecone-client")
+    except Exception as e:
+        print(f"Error checking Pinecone data: {e}")
 
 # For testing purposes
 if __name__ == "__main__":
@@ -551,5 +661,7 @@ if __name__ == "__main__":
     import sys
     if len(sys.argv) > 1 and sys.argv[1] == "--view":
         view_vector_db()
+    elif len(sys.argv) > 1 and sys.argv[1] == "--check":
+        check_pinecone_data()
     else:
         process_messages()
