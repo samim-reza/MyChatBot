@@ -196,4 +196,6 @@ if __name__ == '__main__':
     if chatbot is None:
         logger.error("Cannot start server: Chatbot not initialized")
     else:
+        # The following line is only used when running locally
+        # Render will use the Gunicorn server specified in the Procfile
         app.run(host='0.0.0.0', port=PORT, debug=False)
