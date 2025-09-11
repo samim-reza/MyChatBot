@@ -19,8 +19,8 @@ logger = logging.getLogger(__name__)
 app = Flask(__name__)
 CORS(app)  # Enable CORS for all routes
 
-# Get port from environment variable
-PORT = int(os.getenv("PORT", 5000))
+# Get port from environment variable - Render sets this automatically
+PORT = int(os.getenv("PORT", 10000))
 
 # Initialize the chatbot
 try:
