@@ -20,7 +20,7 @@ app = Flask(__name__)
 CORS(app)  # Enable CORS for all routes
 
 # Get port from environment variable - Render sets this automatically
-PORT = int(os.getenv("PORT", 10000))
+port = int(os.environ.get("PORT", 5000))
 
 # Initialize the chatbot
 try:
@@ -196,6 +196,5 @@ if __name__ == '__main__':
     if chatbot is None:
         logger.error("Cannot start server: Chatbot not initialized")
     else:
-        # The following line is only used when running locally
-        # Render will use the Gunicorn server specified in the Procfile
-        app.run(host='0.0.0.0', port=PORT, debug=False)
+        import uvicorn
+        uvicorn.run(app, host="0.0.0.0", port=port)
