@@ -4,7 +4,6 @@ import glob
 from dotenv import load_dotenv
 import logging
 import requests
-import chromadb
 import numpy as np
 import re
 from datetime import datetime
@@ -18,6 +17,8 @@ logger = logging.getLogger(__name__)
 load_dotenv()
 
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")
+PINECONE_API_KEY = os.getenv("PINECONE_API_KEY")
+PINECONE_ENDPOINT = "https://my-chat-bot-793v1ez.svc.aped-4627-b74a.pinecone.io"
 MESSAGES_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "messages")
 DB_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "db")
 PERSONAL_INFO_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "personal_info")
@@ -42,23 +43,48 @@ class Message:
     def from_dict(cls, data):
         return cls(data.get("sender", "Unknown"), data.get("content", ""), data.get("timestamp", ""))
 
-class ChromaVectorStore:
-    def __init__(self, persist_directory):
-        """Initialize the ChromaDB vector store."""
-        self.persist_directory = persist_directory
-        os.makedirs(persist_directory, exist_ok=True)
-        
-        # Initialize ChromaDB client
-        self.client = chromadb.PersistentClient(path=persist_directory)
-        
-        # Create or get collection
+class PineconeVectorStore:
+    def __init__(self, namespace="messages"):
+        """Initialize the Pinecone vector store."""
         try:
-            self.collection = self.client.get_collection(name="messages_collection")
-            logger.info(f"Loaded collection with {self.collection.count()} documents.")
-        except ValueError:
-            # Collection doesn't exist yet, create it
-            self.collection = self.client.create_collection(name="messages_collection")
-            logger.info("Created new ChromaDB collection.")
+            from pinecone import Pinecone, ServerlessSpec
+            
+            # Initialize Pinecone with the new API (v3.x)
+            pc = Pinecone(api_key=PINECONE_API_KEY)
+            
+            # Get or create index
+            index_name = "my-chat-bot"
+            self.namespace = namespace
+            
+            # Check if the index exists
+            try:
+                # Try to get the index
+                self.index = pc.Index(index_name)
+                logger.info(f"Connected to existing Pinecone index: {index_name}")
+            except Exception:
+                # Create the index if it doesn't exist
+                logger.info(f"Creating new Pinecone index: {index_name}")
+                self.index = pc.create_index(
+                    name=index_name,
+                    dimension=768,  # Using the same dimension as before
+                    metric="cosine",  # Using cosine similarity
+                    spec=ServerlessSpec(
+                        cloud="aws",
+                        region="us-west-2"
+                    )
+                )
+            
+            # Count items in the namespace
+            try:
+                stats = self.index.describe_index_stats()
+                namespace_count = stats.get("namespaces", {}).get(self.namespace, {}).get("vector_count", 0)
+                logger.info(f"Loaded Pinecone index with {namespace_count} vectors in namespace {self.namespace}.")
+            except Exception as e:
+                logger.warning(f"Could not get stats for namespace {self.namespace}: {e}")
+            
+        except Exception as e:
+            logger.error(f"Error initializing Pinecone: {e}")
+            raise
     
     def _create_embedding(self, text):
         """Create a simple embedding for the text."""
@@ -74,46 +100,73 @@ class ChromaVectorStore:
             return
         
         # Prepare data for batch addition
-        ids = [f"doc_{i}" for i in range(self.collection.count(), self.collection.count() + len(messages))]
-        documents = [str(msg) for msg in messages]
-        metadatas = [msg.to_dict() for msg in messages]
-        embeddings = [self._create_embedding(str(msg)) for msg in messages]
+        records = []
         
-        # Add documents to collection in batches to avoid memory issues
+        for i, msg in enumerate(messages):
+            # Create a unique ID
+            id_prefix = f"msg_{int(time.time())}_{i}"
+            
+            # Create embedding
+            embedding = self._create_embedding(str(msg))
+            
+            # Create metadata
+            metadata = msg.to_dict()
+            metadata["text"] = str(msg)  # Store full text in metadata
+            
+            # Add to records list (using new API format)
+            records.append({
+                "id": id_prefix,
+                "values": embedding,
+                "metadata": metadata
+            })
+        
+        # Add vectors in batches to avoid API limits
         batch_size = 100
-        for i in range(0, len(documents), batch_size):
-            end = min(i + batch_size, len(documents))
-            self.collection.add(
-                ids=ids[i:end],
-                documents=documents[i:end],
-                metadatas=metadatas[i:end],
-                embeddings=embeddings[i:end]
-            )
+        for i in range(0, len(records), batch_size):
+            end = min(i + batch_size, len(records))
+            batch = records[i:end]
+            
+            try:
+                self.index.upsert(
+                    vectors=batch,
+                    namespace=self.namespace
+                )
+            except Exception as e:
+                logger.error(f"Error adding vectors to Pinecone: {e}")
         
-        logger.info(f"Added {len(documents)} documents to ChromaDB.")
+        logger.info(f"Added {len(messages)} documents to Pinecone.")
     
     def search(self, query, k=5):
         """Search for similar messages."""
-        if self.collection.count() == 0:
-            return []
-        
-        query_embedding = self._create_embedding(query)
-        results = self.collection.query(
-            query_embeddings=[query_embedding],
-            n_results=k
-        )
-        
-        messages = []
-        for i, document in enumerate(results.get("documents", [[]])[0]):
-            metadata = results.get("metadatas", [[]])[0][i] if i < len(results.get("metadatas", [[]])[0]) else {}
-            message = Message(
-                metadata.get("sender", "Unknown"),
-                metadata.get("content", document),
-                metadata.get("timestamp", "")
+        try:
+            # Create query embedding
+            query_embedding = self._create_embedding(query)
+            
+            # Query Pinecone with new API
+            results = self.index.query(
+                vector=query_embedding,
+                top_k=k,
+                namespace=self.namespace,
+                include_metadata=True
             )
-            messages.append(message)
-        
-        return messages
+            
+            messages = []
+            
+            # Process results with the new response format
+            for match in results.matches:
+                metadata = match.metadata if hasattr(match, 'metadata') else {}
+                message = Message(
+                    metadata.get("sender", "Unknown"),
+                    metadata.get("content", metadata.get("text", "")),
+                    metadata.get("timestamp", "")
+                )
+                messages.append(message)
+            
+            return messages
+            
+        except Exception as e:
+            logger.error(f"Error searching Pinecone: {e}")
+            return []
 
 def extract_messages_from_json(json_file):
     """Extract messages from a Facebook JSON file."""
@@ -174,7 +227,7 @@ def process_messages():
         return
     
     # Create and save vector store
-    vector_store = ChromaVectorStore(DB_DIR)
+    vector_store = PineconeVectorStore(namespace="messages")
     vector_store.add_documents(messages)
     logger.info(f"Created vector store with {len(messages)} messages")
 
@@ -234,9 +287,7 @@ class SamimChatbot:
     def __init__(self):
         """Initialize the chatbot."""
         try:
-            self.vector_store = ChromaVectorStore(DB_DIR)
-            if self.vector_store.collection.count() == 0:
-                logger.warning("Vector store is empty. Run process_messages.py first.")
+            self.vector_store = PineconeVectorStore(namespace="messages")
         except Exception as e:
             logger.error(f"Error initializing vector store: {e}")
             raise ValueError("Vector store not found or invalid. Run process_messages.py first.")
@@ -318,8 +369,16 @@ class SamimChatbot:
     def get_response(self, user_query):
         """Get a response from the chatbot for a user query."""
         try:
-            # Retrieve relevant messages
-            relevant_messages = self.vector_store.search(user_query, k=10)
+            # Create two vector stores for different namespaces
+            messages_store = PineconeVectorStore(namespace="messages")
+            personal_info_store = PineconeVectorStore(namespace="personal_info")
+            
+            # Search in both namespaces
+            messages_results = messages_store.search(user_query, k=5)
+            personal_info_results = personal_info_store.search(user_query, k=5)
+            
+            # Combine results
+            relevant_messages = messages_results + personal_info_results
             context = "\n\n".join([str(msg) for msg in relevant_messages])
             
             # First message to initialize the conversation and provide context
@@ -429,47 +488,59 @@ class SamimChatbot:
 def view_vector_db():
     """View the contents of the vector database."""
     try:
-        # Initialize ChromaDB client
-        client = chromadb.PersistentClient(path=DB_DIR)
+        from pinecone import Pinecone
         
-        # Try to get the collection
+        # Initialize Pinecone with new API
+        pc = Pinecone(api_key=PINECONE_API_KEY)
+        
+        # Connect to the index
         try:
-            collection = client.get_collection(name="messages_collection")
-            count = collection.count()
+            index = pc.Index("my-chat-bot")
+            namespace = "messages"
+            
+            # Get stats
+            stats = index.describe_index_stats()
+            namespace_data = stats.namespaces.get(namespace, {})
+            count = namespace_data.vector_count if hasattr(namespace_data, 'vector_count') else 0
             
             if count == 0:
                 print("Vector database is empty.")
                 return
-                
-            print(f"Vector database contains {count} documents.")
             
-            # Get all documents (with pagination if needed)
-            batch_size = 100
-            total_retrieved = 0
+            print(f"Vector database contains {count} vectors in namespace '{namespace}'.")
+            
+            # Fetch a sample of vectors with new API
+            # Note: Pinecone doesn't have a direct "get all" method like ChromaDB
+            # So we'll search with a random vector to get some samples
+            random_vector = list(np.random.rand(768).astype(float))
+            results = index.query(
+                vector=random_vector,
+                top_k=5,  # Get 5 sample documents
+                namespace=namespace,
+                include_metadata=True
+            )
             
             print("\n===== Sample Messages =====")
             
-            # Get first batch to show as a sample
-            results = collection.get(limit=min(batch_size, count))
-            
-            # Display sample documents
-            for i, doc in enumerate(results['documents']):
-                metadata = results['metadatas'][i] if i < len(results['metadatas']) else {}
+            # Display sample documents with new API response format
+            for i, match in enumerate(results.matches):
+                metadata = match.metadata if hasattr(match, 'metadata') else {}
                 print(f"\n--- Document {i+1} ---")
-                print(f"ID: {results['ids'][i]}")
-                print(f"Content: {doc[:100]}{'...' if len(doc) > 100 else ''}")
+                print(f"ID: {match.id}")
+                print(f"Score: {match.score}")
+                content = metadata.get("text", "")
+                print(f"Content: {content[:100]}{'...' if len(content) > 100 else ''}")
                 print(f"Sender: {metadata.get('sender', 'Unknown')}")
                 print(f"Timestamp: {metadata.get('timestamp', 'Not available')}")
-                
-                # Only show the first 5 documents as samples
-                if i >= 4:
-                    break
-                    
-            print(f"\nShowing 5/{count} documents as a sample.")
             
-        except ValueError:
-            print("No collection found. Run process_messages.py first to create the vector database.")
+            print(f"\nShowing {len(results.matches)}/{count} documents as a sample.")
             
+        except Exception as e:
+            print(f"Error accessing Pinecone index: {e}")
+            print("Run process_messages.py first to create the vector database.")
+            
+    except ImportError:
+        print("Pinecone package is not installed. Run: pip install pinecone-client")
     except Exception as e:
         print(f"Error accessing vector database: {e}")
 

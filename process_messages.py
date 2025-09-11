@@ -6,7 +6,7 @@ from chatbot_setup import process_messages
 import os
 import json
 import glob
-from chatbot_setup import Message, ChromaVectorStore, DB_DIR, logger
+from chatbot_setup import Message, PineconeVectorStore, logger
 
 def process_personal_info():
     """Process personal information from JSON files."""
@@ -86,7 +86,7 @@ if __name__ == "__main__":
     
     if personal_info:
         print(f"Adding {len(personal_info)} personal info items to vector store...")
-        vector_store = ChromaVectorStore(DB_DIR)
+        vector_store = PineconeVectorStore(namespace="personal_info")
         vector_store.add_documents(personal_info)
         print(f"Added personal information to vector store.")
     
