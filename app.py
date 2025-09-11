@@ -38,52 +38,125 @@ def index():
     <html>
     <head>
         <title>Samim's Chatbot</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
         <style>
             body {
-                font-family: Arial, sans-serif;
+                font-family: 'Poppins', Arial, sans-serif;
                 max-width: 800px;
                 margin: 0 auto;
                 padding: 20px;
+                background-color: #f8f9fa;
+                color: #333;
+                line-height: 1.6;
+            }
+            .container {
+                background-color: #fff;
+                border-radius: 12px;
+                box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+                padding: 25px;
+                margin-bottom: 30px;
+            }
+            h1 {
+                color: #2c3e50;
+                text-align: center;
+                margin-bottom: 25px;
+                font-weight: 600;
             }
             #chatbox {
-                height: 400px;
-                border: 1px solid #ccc;
-                padding: 10px;
+                height: 450px;
+                border: 1px solid #e0e0e0;
+                padding: 15px;
                 overflow-y: auto;
-                margin-bottom: 10px;
+                margin-bottom: 20px;
+                border-radius: 8px;
+                background-color: #f9f9f9;
+            }
+            .input-container {
+                display: flex;
+                margin-bottom: 20px;
             }
             #user-input {
-                width: 80%;
-                padding: 8px;
+                flex-grow: 1;
+                padding: 12px;
+                border: 1px solid #ddd;
+                border-radius: 8px 0 0 8px;
+                font-size: 16px;
+                font-family: inherit;
             }
             #send-button {
-                padding: 8px 15px;
-                background-color: #4361ee;
+                padding: 12px 20px;
+                background-color: #3498db;
                 color: white;
                 border: none;
+                border-radius: 0 8px 8px 0;
                 cursor: pointer;
+                font-weight: 500;
+                transition: background-color 0.3s;
+                font-family: inherit;
+            }
+            #send-button:hover {
+                background-color: #2980b9;
             }
             .user-message {
-                background-color: #e6f7ff;
-                padding: 8px;
-                margin: 5px 0;
-                border-radius: 10px;
-                text-align: right;
+                background-color: #3498db;
+                color: white;
+                padding: 10px 15px;
+                margin: 10px 0;
+                border-radius: 18px 18px 0 18px;
+                max-width: 80%;
+                margin-left: auto;
+                word-break: break-word;
             }
             .bot-message {
                 background-color: #f0f0f0;
-                padding: 8px;
-                margin: 5px 0;
-                border-radius: 10px;
+                color: #333;
+                padding: 10px 15px;
+                margin: 10px 0;
+                border-radius: 18px 18px 18px 0;
+                max-width: 80%;
+                word-break: break-word;
+            }
+            .footer {
+                text-align: center;
+                margin-top: 20px;
+                color: #7f8c8d;
+                font-size: 14px;
+            }
+            .footer a {
+                color: #3498db;
+                text-decoration: none;
+                font-weight: 500;
+            }
+            .footer a:hover {
+                text-decoration: underline;
+            }
+            @media (max-width: 600px) {
+                body {
+                    padding: 10px;
+                }
+                .container {
+                    padding: 15px;
+                }
+                #chatbox {
+                    height: 350px;
+                }
             }
         </style>
     </head>
     <body>
-        <h1>Chat with Samim's AI</h1>
-        <div id="chatbox"></div>
-        <div>
-            <input type="text" id="user-input" placeholder="Type your message here...">
-            <button id="send-button">Send</button>
+        <div class="container">
+            <h1>Chat with Samim's AI</h1>
+            <div id="chatbox"></div>
+            <div class="input-container">
+                <input type="text" id="user-input" placeholder="Type your message here...">
+                <button id="send-button">Send</button>
+            </div>
+            <div class="footer">
+                <p>This AI chatbot represents Samim Reza when he's unavailable.</p>
+                <p>Visit <a href="https://samim-reza.github.io/" target="_blank">Samim's Portfolio</a> to learn more about him.</p>
+                <p>&copy; 2025 Samim Reza</p>
+            </div>
         </div>
         
         <script>
@@ -93,7 +166,10 @@ def index():
                 const sendButton = document.getElementById('send-button');
                 
                 // Add a welcome message
-                addBotMessage("Hello! I'm Samim's AI assistant. How can I help you today?");
+                addBotMessage("হ্যালো! আমি শামীমের AI অ্যাসিস্ট্যান্ট। আমি কীভাবে সাহায্য করতে পারি?");
+                
+                // Focus on input field
+                userInput.focus();
                 
                 // Send message when button is clicked
                 sendButton.addEventListener('click', sendMessage);
@@ -113,6 +189,7 @@ def index():
                         
                         // Clear input field
                         userInput.value = '';
+                        userInput.focus();
                         
                         // Show typing indicator
                         const typingIndicator = addBotMessage("Thinking...");
@@ -196,5 +273,5 @@ if __name__ == '__main__':
     if chatbot is None:
         logger.error("Cannot start server: Chatbot not initialized")
     else:
-        import uvicorn
-        uvicorn.run(app, host="0.0.0.0", port=port)
+        # Use Flask's built-in server instead of uvicorn
+        app.run(host='0.0.0.0', port=port, debug=False)
