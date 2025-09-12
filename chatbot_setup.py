@@ -9,6 +9,22 @@ import re
 from datetime import datetime
 import time
 
+# LangChain imports
+try:
+    from langchain_community.vectorstores import Pinecone as LangchainPinecone
+    from langchain.chains import RetrievalQA
+    from langchain_groq import ChatGroq
+    from langchain.prompts import PromptTemplate
+    from langchain.embeddings import FakeEmbeddings
+    from langchain.schema import Document
+    from langchain_core.output_parsers import StrOutputParser
+    from langchain_core.runnables import RunnablePassthrough
+    LANGCHAIN_AVAILABLE = True
+except ImportError:
+    LANGCHAIN_AVAILABLE = False
+    print("LangChain not available. Some features will be disabled.")
+    print("To install: pip install langchain langchain-groq langchain-community")
+
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -42,6 +58,27 @@ class Message:
     @classmethod
     def from_dict(cls, data):
         return cls(data.get("sender", "Unknown"), data.get("content", ""), data.get("timestamp", ""))
+
+# Custom embeddings class for LangChain compatibility
+class HashEmbeddings(FakeEmbeddings):
+    """Simple hash-based embeddings for demonstration."""
+    
+    def __init__(self, size=768):
+        self.size = size
+        super().__init__(size=size)
+    
+    def embed_documents(self, texts):
+        """Embed a list of documents using hash function."""
+        return [self._create_embedding(text) for text in texts]
+    
+    def embed_query(self, text):
+        """Embed a query text using hash function."""
+        return self._create_embedding(text)
+    
+    def _create_embedding(self, text):
+        """Create embedding using a hash-based approach."""
+        np.random.seed(hash(text) % 2**32)
+        return [float(x) for x in np.random.rand(self.size)]
 
 class PineconeVectorStore:
     def __init__(self, namespace="messages"):
@@ -82,9 +119,45 @@ class PineconeVectorStore:
             except Exception as e:
                 logger.warning(f"Could not get stats for namespace {self.namespace}: {e}")
             
+            # Initialize LangChain components if available
+            self.langchain_store = None
+            if LANGCHAIN_AVAILABLE:
+                try:
+                    self._init_langchain_store()
+                except Exception as e:
+                    logger.error(f"Error initializing LangChain store: {e}")
+            
         except Exception as e:
             logger.error(f"Error initializing Pinecone: {e}")
             raise
+            
+    def _init_langchain_store(self):
+        """Initialize LangChain vector store if LangChain is available."""
+        if not LANGCHAIN_AVAILABLE:
+            return
+            
+        try:
+            from pinecone import Pinecone
+            
+            # Initialize Pinecone with the new API
+            pc = Pinecone(api_key=PINECONE_API_KEY)
+            index = pc.Index("my-chat-bot")
+            
+            # Create LangChain embeddings
+            embeddings = HashEmbeddings(size=768)
+            
+            # Initialize LangChain Pinecone vectorstore
+            self.langchain_store = LangchainPinecone(
+                index=index,
+                embedding=embeddings,
+                namespace=self.namespace,
+                text_key="text"  # The key in metadata that contains the text content
+            )
+            
+            logger.info(f"LangChain vector store initialized for namespace {self.namespace}")
+        except Exception as e:
+            logger.error(f"Failed to initialize LangChain vector store: {e}")
+            self.langchain_store = None
     
     def _create_embedding(self, text):
         """Create a simple embedding for the text."""
@@ -279,13 +352,80 @@ class SamimChatbot:
         """Initialize the chatbot."""
         try:
             # Initialize the vector store connection
-            # This will be used for searching, not for initialization
-            pass
+            self.messages_store = PineconeVectorStore(namespace="messages")
+            self.personal_info_store = PineconeVectorStore(namespace="personal_info")
+            
+            # Initialize LangChain components
+            self.langchain_chain = None
+            if LANGCHAIN_AVAILABLE:
+                try:
+                    self._init_langchain_chain()
+                except Exception as e:
+                    logger.error(f"Error initializing LangChain chain: {e}")
+                    
         except Exception as e:
             logger.error(f"Error initializing vector store: {e}")
             raise ValueError("Vector store not found or invalid. Run process_messages.py first.")
         
         self.api_key = GROQ_API_KEY
+        
+    def _init_langchain_chain(self):
+        """Initialize LangChain retrieval chain for question answering."""
+        if not LANGCHAIN_AVAILABLE or not self.personal_info_store.langchain_store:
+            return
+            
+        try:
+            # Initialize LangChain LLM
+            llm = ChatGroq(
+                api_key=self.api_key,
+                model="openai/gpt-oss-20b",
+                temperature=0.0,
+                max_tokens=1024
+            )
+            
+            # Define system prompt
+            samim_system_prompt = """You are Samim Reza's personal AI assistant. You represent Samim when he's unavailable.
+            
+            Keep these facts about Samim in mind:
+            - Computer Science Engineering student at Green University of Bangladesh
+            - Passionate about programming, robotics, and problem-solving
+            - Three-time ICPC regionalist with 1000+ problems solved on various online judges
+            - Currently serving as a Teaching Assistant, Programming Trainer, and Robotics Engineer Intern
+            - Technical expertise includes various programming languages, robotics technologies including ROS, embedded systems, and IoT development
+            - The correct spelling of Samim's name in Bengali is "শামীম"
+            
+            When responding:
+            - Remember you are not talking to Samim, a random person is talking and you are responding as Samim
+            - Be professional but friendly and conversational
+            - Always provide specific information from the context when available
+            - Use Samim's style: casual, preferring to respond in Bengali (Bangla) or mixing Bengali and English
+            - When asked for contact information, use ONLY the information provided in the context
+            - Don't make up any contact information that's not in the context
+            """
+            
+            # Create prompt template
+            prompt_template = PromptTemplate(
+                input_variables=["context", "question"],
+                template=f"{samim_system_prompt}\n\nContext: {{context}}\n\nQuestion: {{question}}\n\nAnswer:"
+            )
+            
+            # Create RetrievalQA chain
+            retriever = self.personal_info_store.langchain_store.as_retriever(
+                search_kwargs={"k": 5}
+            )
+            
+            # Build simple RAG chain
+            self.langchain_chain = (
+                {"context": retriever, "question": RunnablePassthrough()}
+                | prompt_template
+                | llm
+                | StrOutputParser()
+            )
+            
+            logger.info("LangChain retrieval chain initialized successfully")
+        except Exception as e:
+            logger.error(f"Failed to initialize LangChain chain: {e}")
+            self.langchain_chain = None
     
     def get_from_vector_store(self, user_query, namespace="personal_info", k=5):
         """Retrieve relevant information from the vector store."""
@@ -364,7 +504,21 @@ class SamimChatbot:
             # Convert to lowercase once for efficiency
             user_query_lower = user_query.lower()
             
-            # Use pure RAG (Retrieval-Augmented Generation) approach
+            # Try using LangChain chain if available
+            if LANGCHAIN_AVAILABLE and self.langchain_chain is not None:
+                try:
+                    # Check if this is a substantive query (not just a greeting)
+                    simple_greetings = ["hi", "hello", "hey", "কেমন আছো", "কেমন আছেন", "হ্যালো", "হাই", "how are you", "what's up", "sup"]
+                    if not (any(greeting in user_query_lower for greeting in simple_greetings) and len(user_query_lower.split()) < 5):
+                        # Use LangChain for more complex queries
+                        langchain_response = self.langchain_chain.invoke(user_query)
+                        if langchain_response and len(langchain_response.strip()) > 20:
+                            logger.info("Using LangChain response")
+                            return langchain_response
+                except Exception as e:
+                    logger.error(f"Error using LangChain chain: {e}")
+            
+            # Fall back to our custom RAG implementation
             # Define keywords to check for specific information types
             contact_keywords = {
                 "linkedin": ["LinkedIn Link", "linkedin", "লিঙ্কডিন"],
@@ -421,6 +575,7 @@ class SamimChatbot:
                     - The correct spelling of Samim's name in Bengali is "শামীম"
                     
                     When responding:
+                    - Remember you are not talking to samim, a random person is talking and you are responsing as samim.
                     - Be professional but friendly and conversational
                     - Always provide specific information from the context when available
                     - Use Samim's style: casual, preferring to respond in Bengali (Bangla) or mixing Bengali and English
@@ -447,7 +602,7 @@ class SamimChatbot:
                 "messages": messages,
                 "model": "openai/gpt-oss-20b",
                 "max_tokens": 1024,
-                "temperature": 0.5
+                "temperature": 0.0  # Controls randomness: 0=deterministic, 1=creative, 2=very random
             }
             
             response = requests.post(

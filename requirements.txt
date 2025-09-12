@@ -6,3 +6,7 @@ requests==2.28.2
 gunicorn==21.2.0
 numpy>=1.20.0
 pinecone-client==4.1.2
+langchain>=0.1.0
+langchain-groq>=0.1.0
+langchain-community>=0.0.16
+langchain-core>=0.1.10
