@@ -75,6 +75,32 @@ def process_personal_info():
     
     return all_info
 
+def search_received_and_reply(query, namespace="messages", k=5):
+    """
+    Search Pinecone for received messages matching the query,
+    and return the corresponding sent replies.
+    """
+    vector_store = PineconeVectorStore(namespace=namespace)
+    results = vector_store.search(query, k=k)
+    pairs = []
+    for msg in results:
+        # msg.content should be a dict with 'received' and 'sent' if indexed from table
+        try:
+            # Try to parse as JSON if possible
+            content = msg.content
+            if isinstance(content, str):
+                try:
+                    content = json.loads(content)
+                except Exception:
+                    pass
+            received = content.get("received") if isinstance(content, dict) else None
+            sent = content.get("sent") if isinstance(content, dict) else None
+            if received:
+                pairs.append({"received": received, "sent": sent})
+        except Exception:
+            continue
+    return pairs
+
 if __name__ == "__main__":
     print("Processing Facebook messages and personal information...")
     
@@ -89,5 +115,12 @@ if __name__ == "__main__":
         vector_store = PineconeVectorStore(namespace="personal_info")
         vector_store.add_documents(personal_info)
         print(f"Added personal information to vector store.")
-    
+
+    # Example usage: search for a query and get reply pairs
+    user_query = input("Enter a query to search received messages: ")
+    reply_pairs = search_received_and_reply(user_query, namespace="messages", k=5)
+    print("Matched received/sent pairs:")
+    for pair in reply_pairs:
+        print(f"Received: {pair['received']}\nSent: {pair['sent']}\n")
+
     print("Done! The chatbot is ready to use.")

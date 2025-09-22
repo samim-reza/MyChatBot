@@ -30,7 +30,7 @@ class Message:
         self.timestamp = timestamp
     
     def __str__(self):
-        return f"Sender: {self.sender}\nMessage: {self.content}\nTimestamp: {self.timestamp}"
+        return f"Sender: {self.sender}\nMessage: {self.content}"
     
     def to_dict(self):
         return {
@@ -42,6 +42,24 @@ class Message:
     @classmethod
     def from_dict(cls, data):
         return cls(data.get("sender", "Unknown"), data.get("content", ""), data.get("timestamp", ""))
+
+def decode_text(text):
+    if not text:
+        return text
+    # Heuristic: decode only if mojibake is present
+    try:
+        # If there are lots of characters in the range 0x80-0xff, it's likely mojibake
+        if any(ord(c) > 127 for c in text):
+            try:
+                return text.encode('latin1').decode('utf-8')
+            except Exception:
+                try:
+                    return text.encode('windows-1252').decode('utf-8')
+                except Exception:
+                    pass
+        return text
+    except Exception:
+        return text
 
 class PineconeVectorStore:
     def __init__(self, namespace="messages"):
@@ -146,11 +164,20 @@ class PineconeVectorStore:
             # Create embedding
             embedding = self._create_embedding(str(msg))
             
-            # Create metadata
-            metadata = msg.to_dict()
-            metadata["text"] = str(msg)  # Store full text in metadata
-            
-            # Add to records list (using new API format)
+            # Only keep minimal metadata
+            metadata = {}
+            if hasattr(msg, "sender"):
+                metadata["sender"] = msg.sender
+            if hasattr(msg, "content"):
+                metadata["content"] = msg.content
+            if hasattr(msg, "timestamp"):
+                metadata["timestamp"] = msg.timestamp
+            # If the message is from a table file, keep only received/sent
+            if msg.sender in ["received", "sent"]:
+                metadata = {
+                    "type": msg.sender,
+                    "text": msg.content
+                }
             records.append({
                 "id": id_prefix,
                 "values": embedding,
@@ -187,30 +214,43 @@ class PineconeVectorStore:
                 include_metadata=True
             )
             
-            messages = []
+            # Print raw Pinecone results for debugging
+            print("\n[Pinecone Raw Search Results]")
+            for match in results.matches:
+                print(f"ID: {getattr(match, 'id', None)} | Score: {getattr(match, 'score', None)} | Metadata: {getattr(match, 'metadata', None)}")
+            print("[End of Pinecone Raw Search Results]\n")
             
-            # Process results with the new response format
+            messages = []
             for match in results.matches:
                 metadata = match.metadata if hasattr(match, 'metadata') else {}
-                message = Message(
-                    metadata.get("sender", "Unknown"),
-                    metadata.get("content", metadata.get("text", "")),
-                    metadata.get("timestamp", "")
-                )
+                text = metadata.get("content") or metadata.get("text") or ""
+                text = decode_text(text)
+                sender_type = metadata.get("type", metadata.get("sender", "Unknown"))
+                sender_type = decode_text(sender_type)
+                message = Message(sender_type, text)
                 messages.append(message)
-            
             return messages
-            
         except Exception as e:
             logger.error(f"Error searching Pinecone: {e}")
             return []
 
 def extract_messages_from_json(json_file):
-    """Extract messages from a Facebook JSON file."""
+    """Extract messages from a Facebook JSON file or a table file."""
     try:
         with open(json_file, 'r', encoding='utf-8') as f:
             data = json.load(f)
         
+        # If it's a table file (list of dicts with 'received' and 'sent')
+        if isinstance(data, list) and data and isinstance(data[0], dict) and "received" in data[0]:
+            processed_messages = []
+            for item in data:
+                received = item.get("received", "")
+                sent = item.get("sent", "")
+                # Store only minimal metadata
+                processed_messages.append(Message("received", received, ""))
+                processed_messages.append(Message("sent", sent, ""))
+            return processed_messages
+
         # Check if the JSON has the expected structure
         if not isinstance(data, dict) or 'messages' not in data:
             logger.warning(f"Skipping {json_file} - unexpected format")
@@ -249,6 +289,9 @@ def process_all_messages():
     
     # Process each JSON file
     for json_file in json_files:
+        # Only process message_1.json and message_1_table.json
+        if os.path.basename(json_file) not in ["message_1.json", "message_1_table.json"]:
+            continue
         messages = extract_messages_from_json(json_file)
         all_messages.extend(messages)
     
@@ -310,6 +353,20 @@ class Tools:
             logger.error(f"Error searching personal info: {e}")
             return "Error searching personal information."
 
+def get_reply_pairs(messages):
+    """
+    Given a list of Message objects (from Pinecone search),
+    return a list of dicts with 'received' and 'sent' pairs.
+    """
+    pairs = []
+    received_msgs = [m for m in messages if m.sender == "received" and m.content]
+    sent_msgs = [m for m in messages if m.sender == "sent" and m.content]
+    # Pair each received with the next sent (by order)
+    for i, r in enumerate(received_msgs):
+        sent = sent_msgs[i].content if i < len(sent_msgs) else None
+        pairs.append({"received": r.content, "sent": sent})
+    return pairs
+
 class SamimChatbot:
     def __init__(self):
         """Initialize the chatbot."""
@@ -366,7 +423,7 @@ class SamimChatbot:
                 "contact": ["Contact", "যোগাযোগ", "contact information", "Contact Information"]
             }
             
-            user_query_lower = user_query.lower()
+            user_query_lower = user_query.lower();
             
             # Check for specific contact query
             for keyword, titles in contact_titles.items():
@@ -471,40 +528,51 @@ class SamimChatbot:
                         else:
                             return f"শামীমের {category} সম্পর্কিত তথ্য: {vector_result}"
             
-            # Search in both namespaces for relevant information
+            # Search in messages namespace for relevant information
             messages_results = self.messages_store.search(user_query, k=5)
+            reply_pairs = get_reply_pairs(messages_results)
+
+            # Print only the relevant received/sent pairs
+            print("\n--- Relevant Chat Pairs ---")
+            for pair in reply_pairs:
+                print(f"Received: {pair['received']}\nSent: {pair['sent']}\n")
+            print("--- End of Relevant Chat Pairs ---\n")
+
+            # Use only these pairs for context
+            context = "\n\n".join(
+                [f"Received: {pair['received']}\nSent: {pair['sent']}" for pair in reply_pairs]
+            )
+
+            # Optionally, you can still search personal_info if needed
             personal_info_results = self.personal_info_store.search(user_query, k=5)
-            
-            # Combine results to provide context
-            relevant_messages = messages_results + personal_info_results
-            context = "\n\n".join([str(msg) for msg in relevant_messages])
-            
+            context += "\n\n" + "\n\n".join([str(msg) for msg in personal_info_results])
+
             # Prepare the conversation for the API
             messages = [
                 {
                     "role": "system",
-                    "content": """You are Samim Reza's personal AI assistant. You represent Samim when he's unavailable.
-                    
-                    Keep these facts about Samim in mind:
+                    "content": """
+                    You are Samim Reza's personal AI assistant. You represent Samim when he's unavailable.
+
+                    When responding:
+                    - If the context contains a chat pair (Received/Sent) that matches the user's query, reply **exactly** as Samim replied in the 'Sent' field. Do not add any extra information, explanation, or style.
+                    - If there is no matching chat pair, only then use your assistant knowledge and the facts below.
+                    - Do not repeat or summarize the facts unless no chat pair is relevant.
+                    - Do not add extra information, be concise and to the point.
+                    - you know the queries, think and tell the answer
+
+                    Facts about Samim:
                     - Computer Science Engineering student at Green University of Bangladesh
                     - Passionate about programming, robotics, and problem-solving
                     - Three-time ICPC regionalist with 1000+ problems solved on various online judges
                     - Currently serving as a Teaching Assistant, Programming Trainer, and Robotics Engineer Intern
                     - Technical expertise includes various programming languages, robotics technologies including ROS, embedded systems, and IoT development
                     - The correct spelling of Samim's name in Bengali is "শামীম"
-                    
-                    When responding:
-                    - Remember you are not talking to Samim, a random person is talking and you are responding as Samim's assistant
-                    - Be professional but friendly and conversational
-                    - Always provide specific information from the context when available
-                    - Use Samim's style: casual, preferring to respond in Bengali (Bangla) or mixing Bengali and English
-                    - When asked for contact information, use ONLY the information provided in the context
-                    - Don't make up any contact information that's not in the context
                     """
                 },
                 {
                     "role": "user",
-                    "content": f"""User query: {user_query}
+                    "content": f"""User query: you know this, think and tell me {user_query}
                     
                     Here are some relevant messages from Samim's conversations and personal information that might help:
                     {context}"""
