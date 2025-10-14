@@ -1,6 +1,6 @@
 """FastAPI application with streaming support for Samim's chatbot."""
 from fastapi import FastAPI, Request
-from fastapi.responses import HTMLResponse, StreamingResponse, FileResponse
+from fastapi.responses import HTMLResponse, StreamingResponse, FileResponse, Response
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 import json
@@ -49,6 +49,11 @@ async def startup_event():
 async def index():
     """Serve the chat interface."""
     return FileResponse('static/chat.html')
+
+@app.get("/favicon.ico")
+async def favicon():
+    """Return a 204 No Content response for favicon requests."""
+    return Response(status_code=204)
 
 @app.post("/api/chat/stream")
 async def stream_chat(request: Request):
