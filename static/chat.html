@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat with Samim's AI</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            width: 100%;
+            max-width: 500px;
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 25px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        
+        .header p {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+        
+        #chatbox {
+            height: 400px;
+            overflow-y: auto;
+            padding: 20px;
+            background: #f8f9fa;
+        }
+        
+        .message {
+            margin-bottom: 15px;
+            display: flex;
+            animation: fadeIn 0.3s ease-in;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .message.user {
+            justify-content: flex-end;
+        }
+        
+        .message-content {
+            max-width: 70%;
+            padding: 12px 16px;
+            border-radius: 18px;
+            word-wrap: break-word;
+            line-height: 1.4;
+        }
+        
+        .message.user .message-content {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-bottom-right-radius: 4px;
+        }
+        
+        .message.bot .message-content {
+            background: white;
+            color: #333;
+            border: 1px solid #e0e0e0;
+            border-bottom-left-radius: 4px;
+        }
+        
+        .message-content a {
+            color: #667eea;
+            text-decoration: underline;
+            word-break: break-all;
+        }
+        
+        .message.user .message-content a {
+            color: #ffffff;
+        }
+        
+        .input-area {
+            padding: 20px;
+            background: white;
+            border-top: 1px solid #e0e0e0;
+            display: flex;
+            gap: 10px;
+        }
+        
+        #userInput {
+            flex: 1;
+            padding: 12px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 25px;
+            font-size: 14px;
+            outline: none;
+            transition: border-color 0.3s;
+            font-family: 'Poppins', sans-serif;
+        }
+        
+        #userInput:focus {
+            border-color: #667eea;
+        }
+        
+        #sendButton {
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 14px;
+            transition: transform 0.2s, box-shadow 0.2s;
+            font-family: 'Poppins', sans-serif;
+        }
+        
+        #sendButton:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        #sendButton:active {
+            transform: translateY(0);
+        }
+        
+        .footer {
+            padding: 15px;
+            text-align: center;
+            background: #f8f9fa;
+            border-top: 1px solid #e0e0e0;
+        }
+        
+        .footer p {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 5px;
+        }
+        
+        .footer a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+        
+        .footer a:hover {
+            color: #764ba2;
+        }
+        
+        @media (max-width: 600px) {
+            .container {
+                border-radius: 0;
+                height: 100vh;
+                max-width: 100%;
+            }
+            
+            #chatbox {
+                height: calc(100vh - 250px);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Samim's AI Assistant</h1>
+            <p>I respond as Samim Reza when he's unavailable</p>
+        </div>
+        
+        <div id="chatbox"></div>
+        
+        <div class="input-area">
+            <input type="text" id="userInput" placeholder="Type your message here...">
+            <button id="sendButton">Send</button>
+        </div>
+        
+        <div class="footer">
+            <p>Learn more about Samim Reza:</p>
+            <a href="https://samim-reza.github.io/" target="_blank">Visit Portfolio</a>
+            <p style="margin-top: 10px; font-size: 11px;">© 2025 Samim Reza. Powered by AI</p>
+        </div>
+    </div>
+
+    <script>
+        let currentBotMessage = null;
+        
+        // Convert URLs in text to clickable links
+        function linkify(text) {
+            const urlRegex = /(https?:\/\/[^\s]+)/g;
+            return text.replace(urlRegex, function(url) {
+                return '<a href="' + url + '" target="_blank">' + url + '</a>';
+            });
+        }
+
+        // Make functions globally accessible
+        window.addMessage = function(message, isUser) {
+            const chatbox = document.getElementById('chatbox');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${isUser ? 'user' : 'bot'}`;
+            
+            const contentDiv = document.createElement('div');
+            contentDiv.className = 'message-content';
+            
+            // For bot messages, convert URLs to links
+            if (!isUser) {
+                contentDiv.innerHTML = linkify(message);
+            } else {
+                contentDiv.textContent = message;
+            }
+            
+            messageDiv.appendChild(contentDiv);
+            chatbox.appendChild(messageDiv);
+            chatbox.scrollTop = chatbox.scrollHeight;
+            
+            return contentDiv;
+        }
+
+        window.sendMessage = async function() {
+            const input = document.getElementById('userInput');
+            const message = input.value.trim();
+            
+            if (!message) return;
+            
+            addMessage(message, true);
+            input.value = '';
+            input.disabled = true;
+            
+            // Create empty bot message for streaming
+            currentBotMessage = addMessage('', false);
+            
+            try {
+                const response = await fetch('/api/chat/stream', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ question: message })
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const reader = response.body.getReader();
+                const decoder = new TextDecoder('utf-8');
+                let buffer = '';
+                
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) break;
+                    
+                    const chunk = decoder.decode(value, { stream: true });
+                    console.log('Raw chunk received:', chunk);
+                    buffer += chunk;
+                    
+                    // Split by double newline (SSE format: data: {...}\n\n)
+                    const events = buffer.split('\n\n');
+                    buffer = events.pop() || ''; // Keep incomplete event in buffer
+                    
+                    for (const event of events) {
+                        console.log('Processing event:', event);
+                        if (event.trim().startsWith('data: ')) {
+                            try {
+                                const jsonStr = event.trim().slice(6);
+                                console.log('Parsing JSON:', jsonStr);
+                                const data = JSON.parse(jsonStr);
+                                console.log('Parsed data:', data);
+                                if (data.type === 'chunk' && data.content) {
+                                    // Append to text content first
+                                    const currentText = currentBotMessage.textContent + data.content;
+                                    // Then convert to HTML with links
+                                    currentBotMessage.innerHTML = linkify(currentText);
+                                    document.getElementById('chatbox').scrollTop = 
+                                        document.getElementById('chatbox').scrollHeight;
+                                }
+                            } catch (parseError) {
+                                console.log('Parse error for event:', event, 'Error:', parseError);
+                            }
+                        }
+                    }
+                }
+            } catch (error) {
+                console.error('Streaming error:', error);
+                console.error('Error details:', error.message);
+                currentBotMessage.textContent = 'Sorry, something went wrong. Please try again.';
+            } finally {
+                input.disabled = false;
+                input.focus();
+                currentBotMessage = null;
+            }
+        }
+        
+        // Add event listeners when DOM loads
+        document.addEventListener('DOMContentLoaded', function() {
+            const sendButton = document.getElementById('sendButton');
+            const userInput = document.getElementById('userInput');
+            
+            if (sendButton) {
+                sendButton.addEventListener('click', sendMessage);
+            }
+            
+            if (userInput) {
+                userInput.addEventListener('keypress', function(event) {
+                    if (event.key === 'Enter') {
+                        sendMessage();
+                    }
+                });
+            }
+            
+            // Add welcome message when page loads
+            setTimeout(() => {
+                addMessage("Hello! I'm Samim's AI assistant. I can help you learn about Samim Reza - his education, projects, skills, and experience. Feel free to ask me anything!", false);
+            }, 500);
+        });
+    </script>
+</body>
+</html>
