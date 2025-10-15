@@ -1,0 +1,5 @@
+---
+# Azure Web App Configuration
+# This file is used by Azure App Service for deployment configuration
+
+python_version: 3.10
