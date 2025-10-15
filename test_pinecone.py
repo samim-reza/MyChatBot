@@ -11,8 +11,8 @@ load_dotenv()
 
 async def test_search():
     """Test searching for facebook in personal namespace."""
-    PINECONE_API_KEY = os.getenv("PINECONE_API_KEY")
-    INDEX_NAME = "my-chat-bot"
+    PINECONE_API_KEY = os.getenv('PINECONE_API_KEY')
+    INDEX_NAME = "samim-chatbot"
     
     pc = Pinecone(api_key=PINECONE_API_KEY)
     index = pc.Index(INDEX_NAME)

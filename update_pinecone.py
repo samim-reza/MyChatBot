@@ -15,7 +15,7 @@ from langchain_pinecone import PineconeVectorStore
 load_dotenv()
 
 PINECONE_API_KEY = os.getenv("PINECONE_API_KEY")
-INDEX_NAME = "my-chat-bot"
+INDEX_NAME = "samim-chatbot"
 
 def flatten_json_to_text(data: Dict[str, Any], prefix: str = "") -> List[str]:
     """Convert JSON data to text chunks for vectorization."""

@@ -55,6 +55,42 @@ async def favicon():
     """Return a 204 No Content response for favicon requests."""
     return Response(status_code=204)
 
+@app.get("/api/debug/config")
+async def debug_config():
+    """Debug endpoint to check configuration."""
+    from pinecone import Pinecone
+    import os
+    
+    try:
+        pc = Pinecone(api_key=os.getenv("PINECONE_API_KEY"))
+        indexes = [idx.name for idx in pc.list_indexes()]
+        index_name = os.getenv("PINECONE_INDEX_NAME", "samim-chatbot")
+        
+        # Check if the index exists and get stats
+        if index_name in indexes:
+            index = pc.Index(index_name)
+            stats = index.describe_index_stats()
+            namespaces = stats.get('namespaces', {})
+        else:
+            namespaces = None
+            
+        return {
+            "status": "ok",
+            "pinecone_configured": bool(os.getenv("PINECONE_API_KEY")),
+            "groq_configured": bool(os.getenv("GROQ_API_KEY")),
+            "index_name": index_name,
+            "available_indexes": indexes,
+            "index_exists": index_name in indexes,
+            "namespaces": namespaces,
+            "bot_initialized": bot_instance is not None
+        }
+    except Exception as e:
+        return {
+            "status": "error",
+            "error": str(e),
+            "bot_initialized": bot_instance is not None
+        }
+
 @app.post("/api/chat/stream")
 async def stream_chat(request: Request):
     """Stream chat responses using Server-Sent Events."""

@@ -10,15 +10,20 @@ load_dotenv()
 
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 PINECONE_API_KEY = os.getenv("PINECONE_API_KEY")
+PINECONE_INDEX_NAME = os.getenv("PINECONE_INDEX_NAME", "samim-chatbot")
 PINECONE_ENVIRONMENT = os.getenv("PINECONE_ENVIRONMENT", "us-east-1")
 GROQ_BASE_URL = "https://api.groq.com/openai/v1"
 
 async def setup_vector_store(
     namespace: str = "messages",
-    index_name: str = "my-chat-bot"
+    index_name: str = None
 ):
     """Setup Pinecone vector store with custom embeddings."""
     from .embeddings import CustomHashEmbeddings
+    
+    # Use environment variable or default
+    if index_name is None:
+        index_name = PINECONE_INDEX_NAME
     
     pc = Pinecone(api_key=PINECONE_API_KEY)
     
