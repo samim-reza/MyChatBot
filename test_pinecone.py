@@ -28,7 +28,7 @@ async def test_search():
     
     # Test search for facebook
     print("Searching for 'facebook' in personal namespace...")
-    results = await vector_store.asimilarity_search("age", k=5)
+    results = await vector_store.asimilarity_search("facebook", k=5)
     
     print(f"\nFound {len(results)} results:")
     for i, doc in enumerate(results, 1):

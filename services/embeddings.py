@@ -10,7 +10,7 @@ class CustomHashEmbeddings(Embeddings):
     Falls back to hash-based if model not available.
     """
     
-    def __init__(self, dimension: int = 768):
+    def __init__(self, dimension: int = 384):
         self.dimension = dimension
         self.model = None
         

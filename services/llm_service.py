@@ -26,7 +26,7 @@ async def setup_vector_store(
     if index_name not in pc.list_indexes().names():
         pc.create_index(
             name=index_name,
-            dimension=768,
+            dimension=384,  # all-MiniLM-L6-v2 produces 384-dimensional embeddings
             metric="cosine",
             spec=ServerlessSpec(
                 cloud="aws",
