@@ -73,6 +73,15 @@ async def debug_config():
             namespaces = stats.get('namespaces', {})
         else:
             namespaces = None
+        
+        # Check if semantic embeddings are working
+        embeddings_status = "unknown"
+        try:
+            from services.embeddings import CustomHashEmbeddings
+            emb = CustomHashEmbeddings()
+            embeddings_status = "semantic" if emb.model is not None else "hash-based (NOT WORKING)"
+        except Exception as e:
+            embeddings_status = f"error: {str(e)}"
             
         return {
             "status": "ok",
@@ -82,7 +91,9 @@ async def debug_config():
             "available_indexes": indexes,
             "index_exists": index_name in indexes,
             "namespaces": namespaces,
-            "bot_initialized": bot_instance is not None
+            "bot_initialized": bot_instance is not None,
+            "embeddings_type": embeddings_status,
+            "warning": "If embeddings_type is 'hash-based', searches will NOT work!"
         }
     except Exception as e:
         return {

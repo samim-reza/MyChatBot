@@ -18,9 +18,13 @@ class CustomHashEmbeddings(Embeddings):
         try:
             from sentence_transformers import SentenceTransformer
             self.model = SentenceTransformer('all-MiniLM-L6-v2')
-            print("Loaded semantic embeddings model: all-MiniLM-L6-v2")
+            print("✅ Loaded semantic embeddings model: all-MiniLM-L6-v2")
+            print(f"✅ Model dimension: {self.model.get_sentence_embedding_dimension()}")
         except Exception as e:
-            print(f"Warning: Could not load semantic model, using hash-based: {e}")
+            print(f"❌ ERROR: Could not load semantic model, using hash-based: {e}")
+            print(f"❌ This means vector search will NOT work correctly!")
+            import traceback
+            print(f"❌ Full error: {traceback.format_exc()}")
             self.model = None
     
     def _create_embedding(self, text: str) -> List[float]:

@@ -8,8 +8,9 @@ python-dotenv==1.0.0
 
 # AI/ML Libraries
 numpy>=1.20.0
-sentence-transformers
-huggingface_hub
+torch>=2.0.0
+sentence-transformers>=2.2.0
+huggingface-hub>=0.16.0
 
 # LangChain and Vector DB
 langchain>=0.2.0

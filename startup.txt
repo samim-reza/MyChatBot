@@ -1,2 +1,3 @@
 # Azure Web App startup command
-gunicorn --bind=0.0.0.0 --timeout 600 --worker-class uvicorn.workers.UvicornWorker app:app
+# Increased timeout for large ML models (sentence-transformers, torch)
+gunicorn --bind=0.0.0.0 --timeout 900 --workers 1 --worker-class uvicorn.workers.UvicornWorker app:app
