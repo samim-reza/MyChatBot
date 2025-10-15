@@ -12,10 +12,12 @@ __pycache__/
 # Logs
 *.log
 
-# Databases
+# Databases (old - not used)
 .db/
 db/
 
-# Sensitive information
+# NOTE: chroma_db/ is NOT ignored - we need it deployed to Azure!
+
+# Sensitive information  
 messages/
-personal_info/
+personal_info/personal.json

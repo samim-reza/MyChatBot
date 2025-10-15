@@ -1,4 +1,4 @@
-"""FastAPI application with streaming support for Samim's chatbot."""
+"""FastAPI application with streaming support for Samim's chatbot using ChromaDB."""
 from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse, StreamingResponse, FileResponse, Response
 from fastapi.staticfiles import StaticFiles
@@ -7,7 +7,7 @@ import json
 import logging
 import os
 from dotenv import load_dotenv
-from bot import SamimBot
+from bot_chroma import SamimBot
 
 load_dotenv()
 
@@ -58,47 +58,51 @@ async def favicon():
 @app.get("/api/debug/config")
 async def debug_config():
     """Debug endpoint to check configuration."""
-    from pinecone import Pinecone
     import os
+    from pathlib import Path
     
     try:
-        pc = Pinecone(api_key=os.getenv("PINECONE_API_KEY"))
-        indexes = [idx.name for idx in pc.list_indexes()]
-        index_name = os.getenv("PINECONE_INDEX_NAME", "samim-chatbot")
+        chroma_db_dir = Path("./chroma_db")
+        chroma_exists = chroma_db_dir.exists()
         
-        # Check if the index exists and get stats
-        if index_name in indexes:
-            index = pc.Index(index_name)
-            stats = index.describe_index_stats()
-            namespaces = stats.get('namespaces', {})
-        else:
-            namespaces = None
-        
-        # Check if semantic embeddings are working
-        embeddings_status = "unknown"
-        try:
-            from services.embeddings import CustomHashEmbeddings
-            emb = CustomHashEmbeddings()
-            embeddings_status = "semantic" if emb.model is not None else "hash-based (NOT WORKING)"
-        except Exception as e:
-            embeddings_status = f"error: {str(e)}"
+        # Get collection info
+        collections_info = {}
+        if chroma_exists:
+            try:
+                from langchain_chroma import Chroma
+                from services.chroma_service import get_embeddings
+                
+                embeddings = get_embeddings()
+                for collection_name in ["personal", "academic", "projects", "style"]:
+                    try:
+                        vector_store = Chroma(
+                            collection_name=collection_name,
+                            embedding_function=embeddings,
+                            persist_directory=str(chroma_db_dir)
+                        )
+                        count = vector_store._collection.count()
+                        collections_info[collection_name] = {"document_count": count}
+                    except:
+                        collections_info[collection_name] = {"document_count": 0}
+            except Exception as e:
+                collections_info = {"error": str(e)}
             
         return {
             "status": "ok",
-            "pinecone_configured": bool(os.getenv("PINECONE_API_KEY")),
+            "database_type": "ChromaDB",
             "groq_configured": bool(os.getenv("GROQ_API_KEY")),
-            "index_name": index_name,
-            "available_indexes": indexes,
-            "index_exists": index_name in indexes,
-            "namespaces": namespaces,
+            "chroma_db_exists": chroma_exists,
+            "chroma_db_path": str(chroma_db_dir.absolute()) if chroma_exists else "Not created",
+            "collections": collections_info,
             "bot_initialized": bot_instance is not None,
-            "embeddings_type": embeddings_status,
-            "warning": "If embeddings_type is 'hash-based', searches will NOT work!"
+            "embeddings_type": "HuggingFace (all-MiniLM-L6-v2)"
         }
     except Exception as e:
+        import traceback
         return {
             "status": "error",
             "error": str(e),
+            "traceback": traceback.format_exc(),
             "bot_initialized": bot_instance is not None
         }
 
