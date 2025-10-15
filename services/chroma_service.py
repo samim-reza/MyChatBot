@@ -3,6 +3,8 @@ from langchain_core.prompts import PromptTemplate
 from langchain_openai import ChatOpenAI
 from langchain_chroma import Chroma
 from langchain_huggingface import HuggingFaceEmbeddings
+import chromadb
+from chromadb.config import Settings
 import os
 from dotenv import load_dotenv
 
@@ -12,8 +14,9 @@ GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 GROQ_BASE_URL = "https://api.groq.com/openai/v1"
 CHROMA_DB_DIR = "./chroma_db"
 
-# Initialize embeddings once (singleton)
+# Initialize embeddings and client once (singletons)
 _embeddings_instance = None
+_chroma_client = None
 
 def get_embeddings():
     """Get or create embeddings instance (singleton)."""
@@ -28,16 +31,32 @@ def get_embeddings():
         print("✅ Embeddings model loaded successfully")
     return _embeddings_instance
 
+def get_chroma_client():
+    """Get or create persistent ChromaDB client (singleton)."""
+    global _chroma_client
+    if _chroma_client is None:
+        print(f"🔄 Initializing ChromaDB persistent client at {CHROMA_DB_DIR}...")
+        _chroma_client = chromadb.PersistentClient(
+            path=CHROMA_DB_DIR,
+            settings=Settings(
+                anonymized_telemetry=False,
+                allow_reset=False
+            )
+        )
+        print("✅ ChromaDB client initialized")
+    return _chroma_client
+
 
 async def setup_vector_store(collection_name: str = "personal"):
     """Setup ChromaDB vector store."""
     try:
         embeddings = get_embeddings()
+        client = get_chroma_client()
         
         vector_store = Chroma(
+            client=client,
             collection_name=collection_name,
-            embedding_function=embeddings,
-            persist_directory=CHROMA_DB_DIR
+            embedding_function=embeddings
         )
         
         # Get count
@@ -47,6 +66,8 @@ async def setup_vector_store(collection_name: str = "personal"):
         return vector_store
     except Exception as e:
         print(f"❌ Error setting up vector store '{collection_name}': {e}")
+        import traceback
+        print(traceback.format_exc())
         raise
 
 
