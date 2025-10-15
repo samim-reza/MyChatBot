@@ -99,10 +99,10 @@ class SamimBot:
         t_start = time.perf_counter()
         
         # Run all searches in parallel for speed
-        # Increased personal k=3 to catch more contact info (email, facebook, linkedin, etc.)
+        # Increased personal k=5 to catch more contact info (email, facebook, linkedin, etc.)
         # Skip messages namespace (empty, wastes 14s)
         search_tasks = [
-            self.personal_store.asimilarity_search(question, k=2),
+            self.personal_store.asimilarity_search(question, k=5),
             self.academic_store.asimilarity_search(question, k=1),
             self.projects_store.asimilarity_search(question, k=1),
             self.style_store.asimilarity_search(question, k=1),
