@@ -70,33 +70,31 @@ class SamimBot:
 
     async def _get_relevant_context(self, question: str) -> str:
         """Retrieve relevant context from all vector stores."""
-        import asyncio
-        from concurrent.futures import ThreadPoolExecutor
         logger = logging.getLogger(__name__)
         contexts = []
         
         t_start = time.perf_counter()
         
-        # Define synchronous search function
-        def search_collection(store, name, k):
+        # Search each collection sequentially (ChromaDB/SQLite is not thread-safe)
+        # This is fast enough - each search takes ~5-10ms
+        collections_config = [
+            (self.personal_store, "personal", 5),
+            (self.academic_store, "academic", 2),
+            (self.projects_store, "projects", 2),
+            (self.style_store, "style", 1),
+        ]
+        
+        results = []
+        for store, name, k in collections_config:
             try:
                 docs = store.similarity_search(question, k=k)
                 logger.info(f"[TIMING] {name} collection: found {len(docs)} docs")
-                return docs, name
+                results.append((docs, name))
             except Exception as e:
                 logger.error(f"[ERROR] {name} collection search failed: {e}")
-                return [], name
-        
-        # Run searches in parallel using thread pool
-        loop = asyncio.get_event_loop()
-        with ThreadPoolExecutor(max_workers=4) as executor:
-            futures = [
-                loop.run_in_executor(executor, search_collection, self.personal_store, "personal", 5),
-                loop.run_in_executor(executor, search_collection, self.academic_store, "academic", 2),
-                loop.run_in_executor(executor, search_collection, self.projects_store, "projects", 2),
-                loop.run_in_executor(executor, search_collection, self.style_store, "style", 1),
-            ]
-            results = await asyncio.gather(*futures)
+                import traceback
+                logger.error(traceback.format_exc())
+                results.append(([], name))
         
         t_end = time.perf_counter()
         
@@ -105,7 +103,7 @@ class SamimBot:
             for doc in docs:
                 contexts.append(doc.page_content)
         
-        logger.info(f"[TIMING] Parallel vector search completed in {t_end - t_start:.3f}s")
+        logger.info(f"[TIMING] Sequential vector search completed in {t_end - t_start:.3f}s")
         
         return "\n\n".join(contexts)
 
