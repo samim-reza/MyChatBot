@@ -71,29 +71,37 @@ class SamimBot:
     async def _get_relevant_context(self, question: str) -> str:
         """Retrieve relevant context from all vector stores."""
         import asyncio
+        from concurrent.futures import ThreadPoolExecutor
         logger = logging.getLogger(__name__)
         contexts = []
         
         t_start = time.perf_counter()
         
-        # Search all collections in parallel
-        search_tasks = [
-            self.personal_store.asimilarity_search(question, k=5),
-            self.academic_store.asimilarity_search(question, k=2),
-            self.projects_store.asimilarity_search(question, k=2),
-            self.style_store.asimilarity_search(question, k=1),
-        ]
+        # Define synchronous search function
+        def search_collection(store, name, k):
+            try:
+                docs = store.similarity_search(question, k=k)
+                logger.info(f"[TIMING] {name} collection: found {len(docs)} docs")
+                return docs, name
+            except Exception as e:
+                logger.error(f"[ERROR] {name} collection search failed: {e}")
+                return [], name
         
-        results = await asyncio.gather(*search_tasks, return_exceptions=True)
+        # Run searches in parallel using thread pool
+        loop = asyncio.get_event_loop()
+        with ThreadPoolExecutor(max_workers=4) as executor:
+            futures = [
+                loop.run_in_executor(executor, search_collection, self.personal_store, "personal", 5),
+                loop.run_in_executor(executor, search_collection, self.academic_store, "academic", 2),
+                loop.run_in_executor(executor, search_collection, self.projects_store, "projects", 2),
+                loop.run_in_executor(executor, search_collection, self.style_store, "style", 1),
+            ]
+            results = await asyncio.gather(*futures)
+        
         t_end = time.perf_counter()
         
         # Process results
-        collection_names = ["personal", "academic", "projects", "style"]
-        for i, (docs, name) in enumerate(zip(results, collection_names)):
-            if isinstance(docs, Exception):
-                logger.error(f"[ERROR] {name} collection search failed: {docs}")
-                continue
-            logger.info(f"[TIMING] {name} collection: found {len(docs)} docs")
+        for docs, name in results:
             for doc in docs:
                 contexts.append(doc.page_content)
         
