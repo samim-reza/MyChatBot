@@ -3,9 +3,11 @@
 An intelligent, context-aware chatbot powered by **RAG (Retrieval-Augmented Generation)** technology, featuring real-time streaming responses and semantic search capabilities. This personal AI assistant uses ChromaDB for vector storage and Groq's LLM for generating human-like responses.
 
 [![Live Demo](https://img.shields.io/badge/Demo-Live-success)](https://mychatbot-b8vm.onrender.com/)
+[![Azure Deploy](https://github.com/samim-reza/MyChatBot/actions/workflows/azure-deploy.yml/badge.svg)](https://github.com/samim-reza/MyChatBot/actions/workflows/azure-deploy.yml)
 [![Python](https://img.shields.io/badge/Python-3.10-blue)](https://www.python.org/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-Latest-009688)](https://fastapi.tiangolo.com/)
 [![Docker](https://img.shields.io/badge/Docker-Ready-2496ED)](https://www.docker.com/)
+[![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 ## 🌟 Features
 
@@ -295,23 +297,60 @@ Personal data should be structured in `personal_info/personal.json`:
 
 ## 🚀 Deployment
 
-### Render Deployment
+### Azure App Service (Recommended)
 
-The application is configured for Render deployment with:
+Automated deployment using GitHub Actions with Docker containerization.
 
+**Features:**
+- 🔄 Automatic deployment on push to main/master
+- 🐳 Docker-based deployment with optimized caching
+- 🔐 Secure credential management
+- ✅ Automated health checks
+- 📊 Built-in monitoring and logging
+
+**Setup Instructions:**
+
+1. **Create Azure resources** (Container Registry + App Service)
+2. **Configure GitHub Secrets**:
+   - `AZURE_CREDENTIALS` - Service principal JSON
+   - `ACR_USERNAME` - Azure Container Registry username
+   - `ACR_PASSWORD` - Azure Container Registry password
+   - `GROQ_API_KEY` - Groq API key
+3. **Push to GitHub** - Deployment happens automatically!
+
+📖 **Detailed Setup Guide**: [.github/workflows/AZURE_SETUP.md](.github/workflows/AZURE_SETUP.md)
+
+**Access your deployed app:**
+```
+https://samim-chatbot-app.azurewebsites.net
+```
+
+**Estimated Cost**: ~$18/month (B1 tier)
+
+---
+
+### Render Deployment (Alternative)
+
+The application is also configured for Render deployment.
+
+**Features:**
 - **Procfile**: Specifies the startup command
 - **Health Checks**: `/api/debug/config` endpoint
 - **Environment Variables**: Set in Render dashboard
 
-### Deploy to Render
+**Deploy to Render:**
 
 1. Connect your GitHub repository
-2. Set environment variables in Render dashboard
+2. Set environment variables in Render dashboard:
+   - `GROQ_API_KEY`
+   - `ANONYMIZED_TELEMETRY` (optional)
 3. Deploy using the Procfile configuration
 
-```
+```bash
 web: gunicorn app:app --workers 4 --worker-class uvicorn.workers.UvicornWorker --bind 0.0.0.0:$PORT
 ```
+
+**Free Tier Available**: Perfect for testing and development
 
 ## 🤝 Contributing
 
@@ -353,6 +392,6 @@ For support, email samimreza2111@gmail.com or open an issue in the repository.
 <div align="center">
   <strong>Built with ❤️ by Samim Reza</strong>
   <br>
-  <a href="https://mychatbot-b8vm.onrender.com/">Live Demo</a> •
+  <a href="https://samim-chatbot-app.azurewebsites.net">Live Demo</a> •
   <a href="https://github.com/samim-reza/MyChatBot">GitHub</a>
 </div>

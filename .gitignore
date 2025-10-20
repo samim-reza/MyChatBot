@@ -21,3 +21,5 @@ db/
 # Sensitive information  
 messages/
 personal_info/personal.json
+credentials.txt
+for_github.json
