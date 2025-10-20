@@ -50,14 +50,6 @@ async def index():
     """Serve the chat interface."""
     return FileResponse('static/chat.html')
 
-@app.get("/health")
-async def health_check():
-    """Health check endpoint for Docker and Azure."""
-    return {
-        "status": "healthy",
-        "bot_initialized": bot_instance is not None
-    }
-
 @app.get("/favicon.ico")
 async def favicon():
     """Return a 204 No Content response for favicon requests."""
