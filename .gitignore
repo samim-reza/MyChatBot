@@ -23,5 +23,6 @@ data/chroma_db/
 # Sensitive information  
 messages/
 data/personal.json
+data/cv.tex
 credentials.txt
 for_github.json
