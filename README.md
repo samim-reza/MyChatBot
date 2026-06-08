@@ -48,7 +48,8 @@ Before running the app, make sure these exist:
 
 - `.env`
 - `data/personal.json`
-- `data/cv.tex`
+
+`data/cv.tex` is already included in the repo and baked into the Docker image.
 
 Example `.env`:
 
@@ -95,12 +96,13 @@ Commands:
 ```bash
 git clone https://github.com/samim-reza/MyChatBot.git
 cd MyChatBot
+mkdir -p data/chroma_db
 docker compose up -d --build
 docker compose run --rm app python populate_chroma.py
 docker compose logs -f app
 ```
 
-If port 8000 is open on the server firewall, the app will be available at:
+If port `8000` is open on the server firewall, the app will be available at:
 
 ```text
 http://YOUR_DROPLET_IP:8000
@@ -126,4 +128,5 @@ docker compose down
 
 - `data/personal.json` is ignored by git because it contains private data.
 - `data/chroma_db/` is generated data and is also ignored by git.
+- `data/cv.tex` is baked into the Docker image and does not need to be mounted from the VPS.
 - if you update `data/personal.json` or `data/cv.tex`, run `python populate_chroma.py` again.

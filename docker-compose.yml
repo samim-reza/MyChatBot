@@ -8,6 +8,7 @@ services:
     env_file:
       - .env
     ports:
-      - "${APP_PORT:-8000}:8000"
+      - "${APP_PORT:-8000}:${PORT:-8000}"
     volumes:
-      - ./data:/app/data
+      - ./data/personal.json:/app/data/personal.json
+      - ./data/chroma_db:/app/data/chroma_db
