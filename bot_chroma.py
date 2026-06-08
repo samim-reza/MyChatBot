@@ -18,6 +18,17 @@ def tokenize(text: str) -> set[str]:
 
 
 PROFILE_PATH = Path(__file__).resolve().parent / "data" / "personal.json"
+FOLLOW_UP_PATTERNS = (
+    r"^sure\??$",
+    r"^really\??$",
+    r"^are you sure\??$",
+    r"^why\??$",
+    r"^how\??$",
+    r"^what about that\??$",
+    r"^what about it\??$",
+    r"^and\??$",
+    r"^then\??$",
+)
 
 
 class SamimBot:
@@ -65,18 +76,62 @@ class SamimBot:
         self.recent_turns.append({"question": question, "answer": answer})
         self._compact_history()
 
+    def _get_last_turn(self) -> Dict[str, str] | None:
+        if not self.recent_turns:
+            return None
+        return self.recent_turns[-1]
+
     async def get_history(self) -> str:
         recent_history_lines: List[str] = []
-        for turn in self.recent_turns:
-            recent_history_lines.append(f"HUMAN: {turn['question']}")
-            recent_history_lines.append(f"AI: {turn['answer']}")
+        for index, turn in enumerate(self.recent_turns, start=1):
+            recent_history_lines.append(f"Turn {index} HUMAN: {turn['question']}")
+            recent_history_lines.append(f"Turn {index} AI: {turn['answer']}")
 
         history_parts = []
         if self.compacted_history:
             history_parts.append(self.compacted_history)
         if recent_history_lines:
-            history_parts.append("Recent conversation:\n" + "\n".join(recent_history_lines))
+            history_parts.append(
+                "Recent conversation window (most recent turns kept verbatim):\n"
+                + "\n".join(recent_history_lines)
+            )
         return "\n\n".join(history_parts)
+
+    def _is_vague_follow_up(self, question: str) -> bool:
+        normalized = question.strip().lower()
+        if any(re.fullmatch(pattern, normalized) for pattern in FOLLOW_UP_PATTERNS):
+            return True
+        if len(tokenize(normalized)) <= 4 and any(word in normalized for word in ("it", "that", "this", "same")):
+            return True
+        return False
+
+    def _expand_follow_up_question(self, question: str) -> str:
+        last_turn = self._get_last_turn()
+        if not last_turn or not self._is_vague_follow_up(question):
+            return question
+        return (
+            "This is a follow-up to the previous conversation. "
+            f"Previous user question: {last_turn['question']} "
+            f"Previous assistant answer: {last_turn['answer']} "
+            f"Current follow-up question: {question}"
+        )
+
+    def _build_confirmation_response(self, question: str) -> str | None:
+        last_turn = self._get_last_turn()
+        if not last_turn:
+            return None
+
+        normalized = question.strip().lower()
+        if normalized not in {"sure?", "sure", "really?", "really", "are you sure?", "are you sure"}:
+            return None
+
+        last_question = last_turn["question"]
+        last_answer = last_turn["answer"]
+        if is_age_question(last_question):
+            return f"Yes. {last_answer}"
+        if self._is_current_role_question(last_question):
+            return f"Yes. {last_answer}"
+        return None
 
     def _is_current_role_question(self, question: str) -> bool:
         normalized = question.lower()
@@ -167,6 +222,12 @@ class SamimBot:
     async def ask_bot(self, question: str) -> AsyncGenerator[Dict[str, str], None]:
         start_total = time.perf_counter()
         try:
+            confirmation_response = self._build_confirmation_response(question)
+            if confirmation_response:
+                await self.update_history(question, confirmation_response)
+                yield {"type": "chunk", "content": confirmation_response}
+                return
+
             if is_age_question(question):
                 safe_answer = build_age_response()
                 await self.update_history(question, safe_answer)
@@ -180,15 +241,16 @@ class SamimBot:
                     yield {"type": "chunk", "content": current_role_answer}
                     return
 
+            effective_question = self._expand_follow_up_question(question)
             chat_history = await self.get_history()
-            docs_content = await self._get_relevant_context(question)
+            docs_content = await self._get_relevant_context(effective_question)
 
             full_content = ""
             llm_start = time.perf_counter()
             first_chunk = True
 
             async for chunk in stream_response(
-                question=question,
+                question=effective_question,
                 context=docs_content,
                 chat_history=chat_history,
             ):
