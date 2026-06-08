@@ -1,5 +1,6 @@
 """Lightweight RAG chatbot using ChromaDB + Groq API."""
 from typing import AsyncGenerator, Dict, List
+from datetime import date
 import json
 import logging
 from pathlib import Path
@@ -7,7 +8,7 @@ import re
 import time
 
 from services.chroma_service import get_collection
-from services.date_utils import build_age_response, is_age_question
+from services.date_utils import build_age_response, get_current_date, is_age_question
 from services.groq_service import stream_response
 
 logger = logging.getLogger(__name__)
@@ -18,6 +19,32 @@ def tokenize(text: str) -> set[str]:
 
 
 PROFILE_PATH = Path(__file__).resolve().parent / "data" / "personal.json"
+MONTH_MAP = {
+    "jan": 1,
+    "january": 1,
+    "feb": 2,
+    "february": 2,
+    "mar": 3,
+    "march": 3,
+    "apr": 4,
+    "april": 4,
+    "may": 5,
+    "jun": 6,
+    "june": 6,
+    "jul": 7,
+    "july": 7,
+    "aug": 8,
+    "august": 8,
+    "sep": 9,
+    "sept": 9,
+    "september": 9,
+    "oct": 10,
+    "october": 10,
+    "nov": 11,
+    "november": 11,
+    "dec": 12,
+    "december": 12,
+}
 FOLLOW_UP_PATTERNS = (
     r"^sure\??$",
     r"^really\??$",
@@ -133,12 +160,115 @@ class SamimBot:
             return f"Yes. {last_answer}"
         return None
 
+    def _parse_duration_part(self, part: str, fallback_year: int | None = None) -> tuple[int | None, int | None]:
+        normalized = part.strip().lower().replace(".", "")
+        if normalized in {"present", "current", "now"}:
+            today = get_current_date()
+            return today.year, today.month
+
+        year_match = re.search(r"\b(20\d{2}|19\d{2})\b", normalized)
+        year = int(year_match.group(1)) if year_match else fallback_year
+
+        month = None
+        for name, value in MONTH_MAP.items():
+            if re.search(rf"\b{name}\b", normalized):
+                month = value
+                break
+
+        if month is None and year is not None:
+            month = 1
+        return year, month
+
+    def _duration_to_months(self, duration: str) -> int | None:
+        normalized = re.sub(r"\s+", " ", duration.replace("–", "-").replace("—", "-")).strip()
+        if "-" not in normalized:
+            return None
+
+        left, right = [part.strip() for part in normalized.split("-", 1)]
+        right_year, _ = self._parse_duration_part(right)
+        start_year, start_month = self._parse_duration_part(left, fallback_year=right_year)
+        end_year, end_month = self._parse_duration_part(right, fallback_year=start_year)
+
+        if None in {start_year, start_month, end_year, end_month}:
+            return None
+
+        return max(0, (end_year - start_year) * 12 + (end_month - start_month))
+
+    def _format_months_as_experience(self, months: int) -> str:
+        years = months // 12
+        remaining_months = months % 12
+        parts = []
+        if years:
+            parts.append(f"{years} year" + ("s" if years != 1 else ""))
+        if remaining_months:
+            parts.append(f"{remaining_months} month" + ("s" if remaining_months != 1 else ""))
+        return " ".join(parts) if parts else "less than a month"
+
+    def _is_experience_duration_question(self, question: str) -> bool:
+        normalized = question.lower()
+        patterns = (
+            r"\bhow many years of working experience\b",
+            r"\bhow many years of work experience\b",
+            r"\bhow many years of experience\b",
+            r"\bhow long have you worked\b",
+            r"\bfor how many years\b",
+            r"\bwork experience\b",
+        )
+        return any(re.search(pattern, normalized) for pattern in patterns)
+
+    def _build_experience_duration_response(self, question: str) -> str | None:
+        if not self._is_experience_duration_question(question):
+            return None
+
+        experience = self.profile.get("experience", [])
+        current_experience = next(
+            (item for item in experience if "present" in str(item.get("duration", "")).lower()),
+            None,
+        )
+        last_turn = self._get_last_turn()
+        normalized = question.strip().lower()
+
+        if current_experience and last_turn and (
+            self._is_current_role_question(last_turn["question"])
+            or normalized in {"for how many years", "for how many years?", "how long", "how long?"}
+        ):
+            duration = current_experience.get("duration", "")
+            months = self._duration_to_months(duration)
+            if months is not None:
+                formatted = self._format_months_as_experience(months)
+                role = current_experience.get("role", "his current role")
+                organization = current_experience.get("organization", "his current company")
+                return f"Samim has been working as a {role} at {organization} for about {formatted}."
+
+        valid_months = [
+            months
+            for item in experience
+            if (months := self._duration_to_months(str(item.get("duration", "")))) is not None
+        ]
+        if experience and valid_months:
+            earliest_start = min(
+                (
+                    self._parse_duration_part(str(item.get("duration", "")).replace("–", "-").replace("—", "-").split("-", 1)[0].strip(),
+                                              fallback_year=get_current_date().year)
+                    for item in experience
+                ),
+                key=lambda value: (value[0] or 9999, value[1] or 12),
+            )
+            if earliest_start[0] is not None and earliest_start[1] is not None:
+                today = get_current_date()
+                span_months = max(0, (today.year - earliest_start[0]) * 12 + (today.month - earliest_start[1]))
+                formatted = self._format_months_as_experience(span_months)
+                return f"Samim has about {formatted} of working experience, counting his roles from {date(earliest_start[0], earliest_start[1], 1).strftime('%B %Y')} onward."
+
+        return None
+
     def _is_current_role_question(self, question: str) -> bool:
         normalized = question.lower()
         patterns = (
             r"\bcurrent role\b",
             r"\bcurrently where are you working\b",
             r"\bwhere are you working now\b",
+            r"\bwhere do you work\b",
             r"\bwhere do you work now\b",
             r"\bwhat do you do now\b",
             r"\bwhat is your current job\b",
@@ -226,6 +356,12 @@ class SamimBot:
             if confirmation_response:
                 await self.update_history(question, confirmation_response)
                 yield {"type": "chunk", "content": confirmation_response}
+                return
+
+            experience_duration_response = self._build_experience_duration_response(question)
+            if experience_duration_response:
+                await self.update_history(question, experience_duration_response)
+                yield {"type": "chunk", "content": experience_duration_response}
                 return
 
             if is_age_question(question):

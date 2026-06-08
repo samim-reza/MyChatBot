@@ -4,7 +4,7 @@ Personal RAG chatbot for Samim Reza, built with FastAPI, ChromaDB, Groq, and a l
 
 ## What it does
 
-- answers questions about Samim from structured profile data and CV content
+- answers questions about Samim from structured profile data
 - streams responses in the browser
 - keeps short-term chat context with compacted conversation memory
 - uses local Chroma storage for retrieval
@@ -28,7 +28,6 @@ MyChatBot/
 ├── populate_chroma.py
 ├── requirements.txt
 ├── data/
-│   ├── cv.tex
 │   ├── personal.json
 │   └── chroma_db/
 ├── docs/
@@ -48,8 +47,6 @@ Before running the app, make sure these exist:
 
 - `.env`
 - `data/personal.json`
-
-`data/cv.tex` is already included in the repo and baked into the Docker image.
 
 Example `.env`:
 
@@ -153,5 +150,5 @@ docker compose down
 
 - `data/personal.json` is ignored by git because it contains private data.
 - `data/chroma_db/` is generated data and is also ignored by git.
-- `data/cv.tex` is baked into the Docker image and does not need to be mounted from the VPS.
-- if you update `data/personal.json` or `data/cv.tex`, run `python populate_chroma.py` again.
+- `data/personal.json` is the source of truth for the chatbot knowledge.
+- if you update `data/personal.json`, run `python populate_chroma.py` again.

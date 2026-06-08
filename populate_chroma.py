@@ -1,9 +1,8 @@
 #!/usr/bin/env python3
-"""Clear ChromaDB and populate with personal data from personal.json and cv.tex."""
+"""Clear ChromaDB and populate it from personal.json."""
 import json
 import os
 from pathlib import Path
-import re
 from typing import Any
 
 from services.chroma_service import reset_collection
@@ -11,7 +10,6 @@ from services.chroma_service import reset_collection
 CHUNK_SIZE = 400
 DATA_DIR = Path("data")
 PERSONAL_INFO_PATH = DATA_DIR / "personal.json"
-CV_PATH = DATA_DIR / "cv.tex"
 
 
 def flatten_json_to_text(data: Any, prefix: str = "") -> list[str]:
@@ -30,51 +28,6 @@ def flatten_json_to_text(data: Any, prefix: str = "") -> list[str]:
             else:
                 texts.append(f"{prefix}[{i}]: {item}")
     return texts
-
-
-def latex_to_text(content: str) -> str:
-    """Convert a small subset of LaTeX CV markup into searchable plain text."""
-    text = re.sub(r"(?<!\\)%.*", "", content)
-    text = re.sub(r"\\href\{([^}]*)\}\{([^}]*)\}", r"\2 (\1)", text)
-    text = re.sub(r"\\(?:faPhone|faEnvelope|faMapMarker|faLinkedin|faGithub|faGlobe)\b", " ", text)
-    text = re.sub(r"\\section\{([^}]*)\}", r"\nSection: \1\n", text)
-    text = re.sub(r"\\textbf\{([^}]*)\}", r"\1", text)
-    text = re.sub(r"\\textit\{([^}]*)\}", r"\1", text)
-    text = re.sub(r"\\textcolor\{[^}]*\}\{", "", text)
-    text = text.replace("\\resumeSubHeadingListStart", "\n")
-    text = text.replace("\\resumeSubHeadingListEnd", "\n")
-    text = text.replace("\\resumeItemListStart", "\n")
-    text = text.replace("\\resumeItemListEnd", "\n")
-    text = re.sub(r"\\resumeSubheading\s*\{([^}]*)\}\{([^}]*)\}\{([^}]*)\}\{([^}]*)\}", r"\1 | \2 | \3 | \4\n", text)
-    text = re.sub(r"\\resumeProjectHeading\s*\{([^}]*)\}\{([^}]*)\}", r"\1 | \2\n", text)
-    text = re.sub(r"\\resumeItem\{([^}]*)\}", r"- \1\n", text)
-    text = re.sub(r"\\begin\{[^}]*\}|\\end\{[^}]*\}", " ", text)
-    text = re.sub(r"\\[a-zA-Z]+\*?(?:\[[^]]*\])?(?:\{[^}]*\})?", " ", text)
-    text = text.replace("\\&", "&")
-    text = text.replace("\\%", "%")
-    text = text.replace("\\quad", " ")
-    text = text.replace("\\vert", "|")
-    text = text.replace("\\\\", "\n")
-    text = re.sub(r"[{}$]", " ", text)
-    text = re.sub(r"\s+\n", "\n", text)
-    text = re.sub(r"\n{2,}", "\n\n", text)
-    text = re.sub(r"[ \t]{2,}", " ", text)
-    return text.strip()
-
-
-def extract_cv_sections(content: str) -> list[tuple[str, str]]:
-    """Split cv.tex into named sections with searchable plain text."""
-    matches = list(re.finditer(r"\\section\{([^}]*)\}", content))
-    sections: list[tuple[str, str]] = []
-    for index, match in enumerate(matches):
-        section_name = match.group(1).strip()
-        start = match.end()
-        end = matches[index + 1].start() if index + 1 < len(matches) else len(content)
-        section_body = content[start:end].strip()
-        plain_text = latex_to_text(section_body)
-        if plain_text:
-            sections.append((section_name, plain_text))
-    return sections
 
 
 def chunk_text(text: str, max_len: int = CHUNK_SIZE) -> list[str]:
@@ -190,21 +143,6 @@ def build_documents(data: dict) -> list[dict]:
             })
     return documents
 
-
-def build_cv_documents(cv_text: str) -> list[dict]:
-    documents = []
-    sections = extract_cv_sections(cv_text)
-    for index, (section_name, section_text) in enumerate(sections):
-        chunks = chunk_text(f"CV section {section_name}: {section_text}", max_len=700)
-        for chunk_index, chunk in enumerate(chunks):
-            documents.append({
-                "id": f"cv_{index}_{chunk_index}",
-                "text": chunk,
-                "metadata": {"source": "cv.tex", "category": section_name.lower().replace(' ', '_')},
-            })
-    return documents
-
-
 def main():
     print("Clearing existing vector database...")
     collection = reset_collection()
@@ -213,11 +151,8 @@ def main():
     with PERSONAL_INFO_PATH.open("r", encoding="utf-8") as f:
         personal_data = json.load(f)
     print("Loaded personal.json\n")
-    with CV_PATH.open("r", encoding="utf-8") as f:
-        cv_text = f.read()
-    print("Loaded cv.tex\n")
 
-    documents = build_documents(personal_data) + build_cv_documents(cv_text)
+    documents = build_documents(personal_data)
     print(f"Prepared {len(documents)} document chunks\n")
 
     collection.upsert(
