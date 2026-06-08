@@ -46,4 +46,4 @@ def build_age_response() -> str:
     """Return a safe age-only response without exposing the birth date."""
     current_date = get_current_date()
     age = calculate_age(current_date)
-    return f"Samim is {age} years old."
+    return f"I am {age} years old."

@@ -236,9 +236,9 @@ class SamimBot:
             months = self._duration_to_months(duration)
             if months is not None:
                 formatted = self._format_months_as_experience(months)
-                role = current_experience.get("role", "his current role")
-                organization = current_experience.get("organization", "his current company")
-                return f"Samim has been working as a {role} at {organization} for about {formatted}."
+                role = current_experience.get("role", "my current role")
+                organization = current_experience.get("organization", "my current company")
+                return f"I have been working as a {role} at {organization} for about {formatted}."
 
         valid_months = [
             months
@@ -258,7 +258,7 @@ class SamimBot:
                 today = get_current_date()
                 span_months = max(0, (today.year - earliest_start[0]) * 12 + (today.month - earliest_start[1]))
                 formatted = self._format_months_as_experience(span_months)
-                return f"Samim has about {formatted} of working experience, counting his roles from {date(earliest_start[0], earliest_start[1], 1).strftime('%B %Y')} onward."
+                return f"I have about {formatted} of working experience, counting my roles from {date(earliest_start[0], earliest_start[1], 1).strftime('%B %Y')} onward."
 
         return None
 
@@ -293,10 +293,10 @@ class SamimBot:
             location = current_experience.get("location")
             if role and organization:
                 location_part = f" ({location})" if location else ""
-                return f"Currently, Samim is working as a {role} at {organization}{location_part}."
+                return f"I currently work as a {role} at {organization}{location_part}."
 
         if current_role:
-            return f"Currently, Samim is working as a {current_role}."
+            return f"I currently work as a {current_role}."
 
         return None
 
