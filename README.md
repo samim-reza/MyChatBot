@@ -108,6 +108,21 @@ If port `8000` is open on the server firewall, the app will be available at:
 http://YOUR_DROPLET_IP:8000
 ```
 
+## Nginx reverse proxy
+
+Ready config:
+
+- [docs/nginx-samimreza.me.conf](/home/samim01/Code/MyChatBot/docs/nginx-samimreza.me.conf)
+
+Install it on the VPS with:
+
+```bash
+sudo cp docs/nginx-samimreza.me.conf /etc/nginx/sites-available/samimreza.me
+sudo ln -s /etc/nginx/sites-available/samimreza.me /etc/nginx/sites-enabled/samimreza.me
+sudo nginx -t
+sudo systemctl reload nginx
+```
+
 ## Useful Docker commands
 
 ```bash
