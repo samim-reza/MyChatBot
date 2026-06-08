@@ -55,6 +55,8 @@ Example `.env`:
 
 ```env
 GROQ_API_KEY=your_groq_api_key
+PORT=8000
+APP_PORT=80
 ```
 
 ## Local run without Docker
@@ -102,26 +104,34 @@ docker compose run --rm app python populate_chroma.py
 docker compose logs -f app
 ```
 
-If port `8000` is open on the server firewall, the app will be available at:
+If your domain points to the droplet and port `80` is open, the app will be available at:
 
 ```text
-http://YOUR_DROPLET_IP:8000
+http://samimreza.me
 ```
 
-## Nginx reverse proxy
+It will also work directly on:
 
-Ready config:
-
-- [docs/nginx-samimreza.me.conf](/home/samim01/Code/MyChatBot/docs/nginx-samimreza.me.conf)
-
-Install it on the VPS with:
-
-```bash
-sudo cp docs/nginx-samimreza.me.conf /etc/nginx/sites-available/samimreza.me
-sudo ln -s /etc/nginx/sites-available/samimreza.me /etc/nginx/sites-enabled/samimreza.me
-sudo nginx -t
-sudo systemctl reload nginx
+```text
+http://YOUR_DROPLET_IP
 ```
+
+## Domain without port
+
+This project is set up so Docker can bind the app directly to host port `80`.
+
+Use these `.env` values on the VPS:
+
+```env
+GROQ_API_KEY=your_groq_api_key
+PORT=8000
+APP_PORT=80
+```
+
+That means:
+- app runs inside the container on `8000`
+- Docker exposes it on server port `80`
+- visitors can open `http://samimreza.me` without any port number
 
 ## Useful Docker commands
 
