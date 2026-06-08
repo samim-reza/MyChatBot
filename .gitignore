@@ -1,5 +1,6 @@
 # Environment variables
 .env
+.env.*
 
 # Python virtual environment
 venv/
@@ -9,17 +10,18 @@ __pycache__/
 *.pyc
 *.pyo
 
+# Editor settings
+.vscode/
+.idea/
+
 # Logs
 *.log
 
-# Databases (old - not used)
-.db/
-db/
-
-# NOTE: chroma_db/ is NOT ignored - we need it deployed to Azure!
+# Generated data
+data/chroma_db/
 
 # Sensitive information  
 messages/
-personal_info/personal.json
+data/personal.json
 credentials.txt
 for_github.json

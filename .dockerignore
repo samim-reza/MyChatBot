@@ -34,5 +34,5 @@ chroma_db.backup/
 *.bak
 
 # Personal info (keep this excluded for security)
-personal_info/personal.json
+data/personal.json
 credentials.txt

@@ -19,18 +19,19 @@ RUN pip install --no-cache-dir --upgrade pip && \
 # Copy application code
 COPY . .
 
-# Create directory for ChromaDB if it doesn't exist
-RUN mkdir -p chroma_db
+# Create runtime data directories
+RUN mkdir -p data/chroma_db
 
 # Expose port 8000
 EXPOSE 8000
 
 # Set environment variables
 ENV PYTHONUNBUFFERED=1
+ENV PORT=8000
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
-    CMD python -c "import requests; requests.get('http://localhost:8000/api/debug/config', timeout=5)"
+    CMD python -c "import os, urllib.request; port = os.environ.get('PORT', '8000'); urllib.request.urlopen('http://localhost:' + port + '/api/debug/config', timeout=5)"
 
-# Run the application with uvicorn
-CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "8000"]
+# Run the application
+CMD ["python", "app.py"]
