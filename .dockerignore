@@ -22,6 +22,12 @@ __pycache__/
 # Environment
 .env
 venv/
+samim-reza/node_modules/
+samim-reza/build/
+samim-reza/static/
+samim-reza/asset-manifest.json
+samim-reza/.codex/
+samim-reza/.agents/
 
 # Logs
 *.log

@@ -1,13 +1,13 @@
 #!/bin/bash
-# Deploy app
+set -e
 
 echo "Git Pulling..."
 git pull
 
-echo "Building app..."
+echo "Building portfolio, API, and HTTPS proxy..."
 docker compose up -d --build
 
 docker compose run --rm app python populate_chroma.py
 
-echo "Backend Logs..."
-docker compose logs -f app
+echo "App and HTTPS proxy logs..."
+docker compose logs -f app caddy

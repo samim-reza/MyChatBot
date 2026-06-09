@@ -1,9 +1,15 @@
-# MyChatBot
+# Samim Reza Portfolio + AI Chatbot
 
-Personal RAG chatbot for Samim Reza, built with FastAPI, ChromaDB, Groq, and a lightweight custom embedding function.
+Single-domain portfolio and personal RAG chatbot for Samim Reza.
+
+- `https://samimreza.me/` serves the portfolio
+- `https://samimreza.me/chat` serves the chatbot-only page
+- the portfolio chat toggle talks to the same chatbot API directly, without an iframe
+- Caddy handles HTTPS certificates and redirects `www.samimreza.me` to `samimreza.me`
 
 ## What it does
 
+- serves the React portfolio from the FastAPI app
 - answers questions about Samim from structured profile data
 - streams responses in the browser
 - keeps short-term chat context with compacted conversation memory
@@ -15,7 +21,9 @@ Personal RAG chatbot for Samim Reza, built with FastAPI, ChromaDB, Groq, and a l
 - FastAPI
 - Groq API
 - ChromaDB
+- React
 - Docker / Docker Compose
+- Caddy for HTTPS
 
 ## Project structure
 
@@ -23,6 +31,7 @@ Personal RAG chatbot for Samim Reza, built with FastAPI, ChromaDB, Groq, and a l
 MyChatBot/
 ├── app.py
 ├── bot_chroma.py
+├── Caddyfile
 ├── Dockerfile
 ├── docker-compose.yml
 ├── populate_chroma.py
@@ -30,8 +39,12 @@ MyChatBot/
 ├── data/
 │   ├── personal.json
 │   └── chroma_db/
-├── docs/
-│   └── app.md
+├── samim-reza/
+│   ├── public/
+│   ├── src/
+│   ├── writing/
+│   ├── package-lock.json
+│   └── package.json
 ├── services/
 │   ├── chroma_service.py
 │   ├── date_utils.py
@@ -53,7 +66,6 @@ Example `.env`:
 ```env
 GROQ_API_KEY=your_groq_api_key
 PORT=8000
-APP_PORT=80
 ```
 
 ## Local run without Docker
@@ -63,6 +75,10 @@ python3 -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
 python3 populate_chroma.py
+cd samim-reza
+npm ci
+npm run build
+cd ..
 python3 app.py
 ```
 
@@ -72,12 +88,18 @@ Open:
 http://localhost:8000
 ```
 
+Local paths:
+
+- `http://localhost:8000/` - portfolio
+- `http://localhost:8000/chat` - chatbot-only page
+- `http://localhost:8000/api/debug/config` - health/config check
+
 ## Run with Docker
 
 ```bash
 docker compose up -d --build
 docker compose run --rm app python populate_chroma.py
-docker compose logs -f app
+docker compose logs -f app caddy
 ```
 
 ## DigitalOcean deployment
@@ -85,10 +107,12 @@ docker compose logs -f app
 On the droplet:
 
 1. install Docker and Docker Compose plugin
-2. clone the repo
-3. create `.env`
-4. place your private profile file at `data/personal.json`
-5. start the app and build the vector database
+2. point DNS `A` records for `samimreza.me` and `www.samimreza.me` to the droplet IP
+3. make sure ports `80` and `443` are open in the DigitalOcean firewall
+4. clone the repo
+5. create `.env`
+6. place your private profile file at `data/personal.json`
+7. start the app and build the vector database
 
 Commands:
 
@@ -98,51 +122,29 @@ cd MyChatBot
 mkdir -p data/chroma_db
 docker compose up -d --build
 docker compose run --rm app python populate_chroma.py
-docker compose logs -f app
+docker compose logs -f app caddy
 ```
 
-If your domain points to the droplet and port `80` is open, the app will be available at:
+After DNS points to the droplet, Caddy automatically requests and renews HTTPS certificates.
 
-```text
-http://samimreza.me
-```
+Production URLs:
 
-It will also work directly on:
-
-```text
-http://YOUR_DROPLET_IP
-```
-
-## Domain without port
-
-This project is set up so Docker can bind the app directly to host port `80`.
-
-Use these `.env` values on the VPS:
-
-```env
-GROQ_API_KEY=your_groq_api_key
-PORT=8000
-APP_PORT=80
-```
-
-That means:
-- app runs inside the container on `8000`
-- Docker exposes it on server port `80`
-- visitors can open `http://samimreza.me` without any port number
+- `https://samimreza.me/` - portfolio
+- `https://samimreza.me/chat` - chatbot-only page
+- `https://samimreza.me/api/chat/stream` - streaming chat API
 
 ## Useful Docker commands
 
 ```bash
 docker compose up -d --build
-docker compose restart app
-docker compose logs -f app
+docker compose restart app caddy
+docker compose logs -f app caddy
 docker compose run --rm app python populate_chroma.py
 docker compose down
 ```
 
 ## API endpoints
 
-- `/` - chat UI
 - `/api/chat/stream` - streaming chat endpoint
 - `/api/debug/config` - debug and health info
 

@@ -1,0 +1,7 @@
+samimreza.me {
+	reverse_proxy app:8000
+}
+
+www.samimreza.me {
+	redir https://samimreza.me{uri} permanent
+}

@@ -1,0 +1,1072 @@
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Inter:wght@300;400;500;700&display=swap");
+:root {
+    --primary-color: #4361ee;
+    --primary-light: #eef2ff;
+    --secondary-color: #3f37c9;
+    --accent-color: #06d6a0;
+    --text-primary: #212529;
+    --text-secondary: #495057;
+    --text-light: #6c757d;
+    --bg-light: #f8f9fa;
+    --bg-white: #ffffff;
+    --border-color: #e9ecef;
+    --shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+    --transition: all 0.3s ease;
+    /* Old book colors */
+    --book-bg: #f5f1e6;
+    --book-page: #faf6e9;
+    --book-text: #46433b;
+    --book-border: #d3c7a6;
+    --book-shadow: 0 10px 30px rgba(131, 105, 58, 0.2);
+    --book-accent: #8c7851;
+    --book-cover: #8b5a2b;
+    --book-spine: #654321;
+    --book-gold: #d4af37;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Hind Siliguri', sans-serif;
+    background-color: var(--book-bg);
+    color: var(--book-text);
+    line-height: 1.8;
+    overflow-x: hidden;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+section {
+    padding: 40px 0;
+}
+
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 0;
+    border-bottom: 1px solid var(--book-border);
+}
+
+.logo {
+    font-family: "Poppins", sans-serif;
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--primary-color);
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.logo span {
+    color: var(--accent-color);
+}
+
+.logo i {
+    color: var(--book-accent);
+}
+
+.nav-links {
+    display: flex;
+    list-style: none;
+    gap: 30px;
+}
+
+.nav-links a {
+    text-decoration: none;
+    color: var(--book-accent);
+    font-weight: 500;
+    transition: var(--transition);
+    position: relative;
+}
+
+.nav-links a:hover {
+    color: var(--primary-color);
+}
+
+.nav-links a::after {
+    content: "";
+    position: absolute;
+    bottom: -5px;
+    left: 0;
+    width: 0;
+    height: 2px;
+    background: var(--primary-color);
+    transition: var(--transition);
+}
+
+.nav-links a:hover::after {
+    width: 100%;
+}
+
+.book-wrapper {
+    display: flex;
+    max-width: 1100px;
+    margin: 40px auto;
+    position: relative;
+}
+
+
+/* Index sidebar */
+
+.book-index {
+    width: 220px;
+    background: var(--book-page);
+    border: 1px solid var(--book-border);
+    border-radius: 10px 0 0 10px;
+    box-shadow: var(--book-shadow);
+    padding: 30px 20px;
+    margin-right: 20px;
+    position: relative;
+    z-index: 1;
+    height: fit-content;
+}
+
+.index-title {
+    font-size: 1.3rem;
+    color: var(--book-accent);
+    text-align: center;
+    margin-bottom: 25px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--book-border);
+    font-weight: 600;
+}
+
+.index-category {
+    margin-bottom: 25px;
+}
+
+.category-title {
+    font-size: 1.1rem;
+    color: var(--book-accent);
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.category-title i {
+    font-size: 0.9rem;
+}
+
+.category-title.active {
+    color: var(--primary-color);
+    font-weight: bold;
+}
+
+.index-list {
+    list-style: none;
+    padding-left: 15px;
+}
+
+.index-list li {
+    margin-bottom: 8px;
+    position: relative;
+}
+
+.index-list li::before {
+    content: "•";
+    position: absolute;
+    left: -12px;
+    color: var(--book-accent);
+}
+
+.index-list a {
+    color: var(--book-text);
+    text-decoration: none;
+    font-size: 0.95rem;
+    transition: var(--transition);
+}
+
+.index-list a:hover {
+    color: var(--primary-color);
+}
+
+.index-list a.active {
+    color: var(--primary-color);
+    font-weight: 600;
+}
+
+
+/* Flipbook container */
+
+.flipbook-container {
+    flex: 1;
+    position: relative;
+    height: 600px;
+    perspective: 1500px;
+}
+
+
+/* Book Cover */
+
+.book-cover {
+    width: 460px;
+    height: 600px;
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%) rotateY(0deg);
+    transform-style: preserve-3d;
+    background: var(--book-cover);
+    border-radius: 0 5px 5px 0;
+    box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2), 10px 5px 15px rgba(0, 0, 0, 0.1), -10px 5px 15px rgba(0, 0, 0, 0.1);
+    z-index: 100;
+    transition: transform 0.8s ease;
+}
+
+.book-cover.open {
+    transform: translateX(-50%) rotateY(-180deg);
+}
+
+.book-spine {
+    position: absolute;
+    height: 100%;
+    width: 40px;
+    left: -40px;
+    top: 0;
+    background: var(--book-spine);
+    border-radius: 5px 0 0 5px;
+    box-shadow: inset -5px 0 10px rgba(0, 0, 0, 0.2);
+}
+
+.cover-content {
+    padding: 60px 40px;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    color: var(--book-gold);
+    text-align: center;
+    border: 12px solid var(--book-gold);
+    border-left: none;
+    box-sizing: border-box;
+    height: 100%;
+}
+
+.cover-content h1 {
+    font-size: 2.5rem;
+    margin-bottom: 20px;
+    font-family: 'Hind Siliguri', sans-serif;
+}
+
+.cover-content p {
+    font-size: 1.2rem;
+    margin-bottom: 40px;
+    font-style: italic;
+}
+
+.author-name {
+    font-size: 1.5rem;
+    margin-top: 40px;
+    border-top: 1px solid var(--book-gold);
+    padding-top: 20px;
+    width: 80%;
+}
+
+.cover-icon {
+    font-size: 3rem;
+    margin: 30px 0;
+}
+
+.open-book {
+    position: absolute;
+    bottom: 30px;
+    font-size: 0.9rem;
+    padding: 8px 15px;
+    border: 2px solid var(--book-gold);
+    border-radius: 20px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.open-book:hover {
+    background: var(--book-gold);
+    color: var(--book-cover);
+}
+
+
+/* Flipbook */
+
+.flipbook {
+    width: 100%;
+    height: 100%;
+    margin: 0 auto;
+    perspective: 1500px;
+}
+
+
+/* Individual pages */
+
+.book-page {
+    background: var(--book-page);
+    width: 100%;
+    height: 100%;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+}
+
+
+/* Add these styles to fix scrolling issues */
+
+/* General scrolling behavior for book pages */
+.book-page {
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Make sure page content is properly contained */
+.page-content {
+  height: 100%;
+  position: relative;
+}
+
+/* Mobile specific fixes */
+@media screen and (max-width: 768px) {
+  /* Fix vertical scrolling for book pages on mobile */
+  .book-page {
+    overflow-y: auto !important; /* Force vertical scrollbar when needed */
+    max-height: 70vh; /* Limit height to ensure scrollability */
+    height: auto !important; /* Override any fixed heights */
+    padding-bottom: 30px; /* Add padding at bottom to prevent content being cut off */
+  }
+  
+  /* Fix for turn.js pages to allow scrolling */
+  .turn-page {
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  /* Ensure flipbook container doesn't restrict scrolling */
+  .flipbook-container {
+    overflow: visible;
+    height: auto !important;
+  }
+  
+  /* Ensure the flipbook itself allows for proper page display */
+  #flipbook {
+    height: auto !important;
+    min-height: 400px;
+  }
+  
+  /* Fix for poem content specifically */
+  [data-page^="poem"] .page-content {
+    overflow-y: auto !important;
+    max-height: none !important;
+  }
+}
+
+/* For very small screens */
+@media screen and (max-width: 480px) {
+  .book-page {
+    max-height: 60vh; /* Even smaller height for very small screens */
+  }
+}
+
+
+/* Introduction page */
+
+.intro-page {
+    overflow: auto !important;
+    padding: 0;
+}
+
+.intro-content {
+    padding: 60px 40px;
+    text-align: center;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: var(--book-page);
+    border: 1px solid var(--book-border);
+}
+
+.intro-content h1 {
+    font-size: 2.5rem;
+    margin-bottom: 10px;
+    color: var(--book-accent);
+    font-family: 'Hind Siliguri', sans-serif;
+}
+
+.intro-content p {
+    font-size: 1.2rem;
+    margin-bottom: 40px;
+    font-style: italic;
+    color: var(--book-text);
+}
+
+.intro-text {
+    max-width: 80%;
+    line-height: 1.8;
+    margin-top: 40px;
+}
+
+.intro-footer {
+    margin-top: auto;
+    padding-top: 20px;
+    width: 100%;
+    text-align: center;
+    border-top: 1px solid var(--book-border);
+}
+
+
+/* Regular content page */
+
+.page-content {
+    padding: 40px;
+    height: 100%;
+    overflow-y: auto;
+    position: relative;
+}
+
+.page-footer {
+    position: absolute;
+    bottom: 20px;
+    width: calc(100% - 80px);
+    text-align: center;
+    border-top: 1px solid var(--book-border);
+    padding-top: 15px;
+    font-style: italic;
+    color: var(--book-accent);
+}
+
+
+/* Book back cover */
+
+.book-back-cover {
+    background: var(--book-cover);
+    color: var(--book-gold);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.back-cover-content {
+    text-align: center;
+    padding: 40px;
+    border: 12px solid var(--book-gold);
+    border-right: none;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.author-quote {
+    font-size: 1.5rem;
+    font-style: italic;
+    line-height: 1.8;
+    max-width: 80%;
+    margin-bottom: 30px;
+}
+
+.author-signature {
+    font-size: 1.2rem;
+    align-self: flex-end;
+    margin-right: 60px;
+}
+
+.writing-item {
+    margin-bottom: 30px;
+}
+
+.writing-title {
+    font-size: 1.8rem;
+    color: var(--book-accent);
+    margin-bottom: 15px;
+    font-weight: 600;
+    position: relative;
+    text-align: center;
+}
+
+.writing-title:after {
+    content: "✦";
+    position: absolute;
+    right: 0;
+    top: 0;
+    color: var(--book-border);
+    font-size: 1.5rem;
+    display: none;
+}
+
+.writing-date {
+    font-style: italic;
+    color: var(--book-accent);
+    margin-bottom: 20px;
+    font-size: 0.9rem;
+    text-align: center;
+}
+
+.writing-content {
+    font-size: 1.1rem;
+    line-height: 1.9;
+    text-align: center;
+    color: var(--book-text);
+    max-width: 90%;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.writing-content p {
+    margin-bottom: 20px;
+    text-indent: 0;
+}
+
+.read-more {
+    display: inline-block;
+    margin-top: 15px;
+    font-style: italic;
+    color: var(--primary-color);
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 0.95rem;
+}
+
+.read-more:hover {
+    text-decoration: underline;
+}
+
+
+/* Page numbers */
+
+.page-number {
+    font-style: italic;
+    color: var(--book-accent);
+    font-size: 0.9rem;
+}
+
+
+/* Book decorations */
+
+.book-corner {
+    position: absolute;
+    width: 30px;
+    height: 30px;
+}
+
+.corner-tl {
+    top: 0;
+    left: 0;
+    border-top: 3px solid var(--book-border);
+    border-left: 3px solid var(--book-border);
+    border-top-left-radius: 10px;
+}
+
+.corner-tr {
+    top: 0;
+    right: 0;
+    border-top: 3px solid var(--book-border);
+    border-right: 3px solid var(--book-border);
+    border-top-right-radius: 10px;
+}
+
+.corner-bl {
+    bottom: 0;
+    left: 0;
+    border-bottom: 3px solid var(--book-border);
+    border-left: 3px solid var(--book-border);
+    border-bottom-left-radius: 10px;
+}
+
+.corner-br {
+    bottom: 0;
+    right: 0;
+    border-bottom: 3px solid var(--book-border);
+    border-right: 3px solid var(--book-border);
+    border-bottom-right-radius: 10px;
+}
+
+footer {
+    background: var(--book-border);
+    color: var(--book-text);
+    padding: 30px 0;
+    text-align: center;
+}
+
+.footer-content {
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.footer-content a {
+    color: var(--primary-color);
+    text-decoration: none;
+}
+
+.footer-content a:hover {
+    text-decoration: underline;
+}
+
+
+/* Page navigation controls */
+
+.page-nav-controls {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    position: absolute;
+    bottom: 20px;
+    left: 0;
+    padding: 0 20px;
+    z-index: 100;
+}
+
+.page-btn {
+    background-color: var(--book-accent);
+    color: var(--book-page);
+    border: none;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 3px 5px rgba(0, 0, 0, 0.2);
+    transition: all 0.3s ease;
+}
+
+.page-btn:hover {
+    background-color: var(--primary-color);
+    transform: scale(1.1);
+}
+
+.page-btn:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+
+.page-btn i {
+    font-size: 1.2rem;
+}
+
+.page-indicator {
+    background-color: rgba(255, 255, 255, 0.8);
+    padding: 5px 15px;
+    border-radius: 20px;
+    font-style: italic;
+    color: var(--book-accent);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.page-corner-hint {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    background-color: rgba(255, 255, 255, 0.8);
+    padding: 8px 12px;
+    border-radius: 5px;
+    font-size: 0.8rem;
+    color: var(--book-accent);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    animation: fadeInOut 2s ease-in-out infinite;
+}
+
+@keyframes fadeInOut {
+    0% {
+        opacity: 0.7;
+    }
+    50% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 0.7;
+    }
+}
+
+.page-corner {
+    position: absolute;
+    width: 50px;
+    height: 50px;
+    bottom: 0;
+    cursor: pointer;
+    z-index: 10;
+}
+
+.page-corner-right {
+    right: 0;
+    border-bottom-left-radius: 10px;
+}
+
+.page-corner-left {
+    left: 0;
+    border-bottom-right-radius: 10px;
+}
+
+.keyboard-hint {
+    position: absolute;
+    bottom: 60px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: rgba(255, 255, 255, 0.8);
+    padding: 5px 10px;
+    border-radius: 5px;
+    font-size: 0.8rem;
+    color: var(--book-accent);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+
+/* Ensure all writing items use consistent layout */
+
+.writing-item.scene-item {
+    position: relative !important;
+    width: 100% !important;
+    height: 100% !important;
+    min-height: 600px !important;
+    box-sizing: border-box !important;
+    padding: 40px !important;
+    background-color: var(--book-page) !important;
+    color: var(--book-text) !important;
+    display: flex !important;
+    flex-direction: column !important;
+    overflow: hidden !important;
+    border: 1px solid var(--book-border) !important;
+    box-shadow: var(--book-shadow) !important;
+}
+
+.writing-item.scene-item .writing-title {
+    font-size: 1.8rem !important;
+    margin-bottom: 10px !important;
+    color: var(--book-accent) !important;
+    font-weight: 600 !important;
+    text-align: center !important;
+    font-family: 'Hind Siliguri', sans-serif !important;
+}
+
+.writing-item.scene-item .writing-date {
+    font-style: italic !important;
+    margin-bottom: 20px !important;
+    color: var(--text-light) !important;
+    text-align: center !important;
+    font-size: 0.9rem !important;
+}
+
+.writing-item.scene-item .writing-content {
+    flex: 1 1 auto !important;
+    overflow-y: auto !important;
+    overflow-x: auto !important;
+    line-height: 1.8 !important;
+    font-size: 1rem !important;
+    text-align: left !important;
+    padding-right: 10px !important;
+    -webkit-overflow-scrolling: touch !important;
+    font-family: 'Hind Siliguri', sans-serif !important;
+}
+
+.writing-item.scene-item .writing-content p {
+    margin-bottom: 15px !important;
+    text-indent: 0 !important;
+}
+
+
+/* Ensure flipbook pages render correctly */
+
+.flipbook .page {
+    background-color: var(--book-page) !important;
+    overflow: hidden !important;
+    position: relative !important;
+}
+
+.flipbook .page-wrapper {
+    overflow: hidden !important;
+    position: relative !important;
+}
+
+
+/* Fix turn.js page rendering */
+
+.turn-page {
+    background-color: var(--book-page) !important;
+}
+
+.turn-page-wrapper {
+    overflow: hidden !important;
+    background-color: var(--book-page) !important;
+}
+
+
+/* Ensure book pages are properly sized */
+
+.book-page,
+.writing-item.scene-item {
+    counter-increment: page-number;
+    width: 461px !important;
+    height: 600px !important;
+    background-color: var(--book-page) !important;
+}
+
+
+/* Responsive design */
+
+@media (max-width: 992px) {
+    .book-wrapper {
+        flex-direction: column;
+        align-items: center;
+    }
+    .book-index {
+        width: 100%;
+        max-width: 600px;
+        margin-right: 0;
+        margin-bottom: 40px;
+        border-radius: 10px;
+    }
+    .index-category {
+        margin-bottom: 15px;
+    }
+    .book-index {
+        padding: 20px;
+    }
+    .index-title {
+        margin-bottom: 15px;
+    }
+    .index-categories {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+    }
+    .index-category {
+        flex: 1;
+        min-width: 200px;
+    }
+    .flipbook-container {
+        width: 100%;
+        max-width: 600px;
+    }
+    .book-cover,
+    .book-page {
+        width: 100%;
+        max-width: 460px;
+    }
+}
+
+@media (max-width: 768px) {
+  .book-wrapper {
+    flex-direction: column;
+    overflow-y: auto; /* Enable vertical scrolling when needed */
+    max-height: none; /* Remove any height restrictions */
+  }
+  
+  /* Enable horizontal scrolling for book content that might overflow */
+  .flipbook-container {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+  }
+  
+  /* Make sure the book content doesn't get cut off */
+  #flipbook {
+    min-width: 300px; /* Minimum width to ensure content is readable */
+    margin: 0 auto;
+  }
+  
+  /* Ensure the book pages can be scrolled horizontally if needed */
+  .book-page {
+    overflow-x: auto;
+    overflow-y: auto;
+    max-height: 70vh; /* Limit height on mobile to ensure scrollability */
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  /* Ensure index doesn't cause horizontal overflow */
+  .book-index {
+    width: 100%;
+    overflow-x: hidden;
+    margin-bottom: 20px;
+  }
+  
+  /* Ensure long content in index items can scroll if needed */
+  .index-list {
+    max-height: 300px;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  /* Ensure content containers don't restrict scrolling */
+  .container {
+    overflow: visible;
+    padding: 10px;
+  }
+  
+  /* Make sure navigation controls are always visible */
+  .page-nav-controls {
+    position: relative;
+    bottom: auto;
+    margin: 15px auto;
+  }
+}
+
+@media (max-width: 480px) {
+    .cover-content {
+        padding: 40px 20px;
+    }
+    .cover-content h1 {
+        font-size: 1.8rem;
+    }
+    .page-content {
+        padding: 20px 15px;
+    }
+    .writing-content {
+        font-size: 1rem;
+    }
+    .flipbook-container {
+        height: 450px;
+    }
+    #flipbook {
+        height: 450px;
+    }
+}
+
+/* Responsive container and book layout */
+@media (max-width: 1200px) {
+  .flipbook-container {
+    width: 100%;
+    max-width: 700px;
+  }
+  #flipbook {
+    width: 100% !important;
+    max-width: 700px !important;
+    height: 480px !important;
+  }
+}
+
+@media (max-width: 900px) {
+  .book-wrapper {
+    flex-direction: column;
+  }
+  .book-index {
+    width: 100%;
+    margin-bottom: 20px;
+  }
+  .flipbook-container {
+    width: 100%;
+    max-width: 100%;
+  }
+  #flipbook {
+    width: 100% !important;
+    max-width: 100% !important;
+    height: 400px !important;
+  }
+}
+
+@media (max-width: 600px) {
+  .container {
+    padding: 0 5px;
+  }
+  .book-index {
+    font-size: 15px;
+    padding: 10px 0;
+  }
+  .flipbook-container {
+    padding: 0;
+  }
+  #flipbook {
+    width: 100% !important;
+    max-width: 100% !important;
+    height: 260px !important;
+  }
+  .book-page, .writing-item {
+    font-size: 15px;
+    padding: 10px 5px;
+  }
+  .page-nav-controls {
+    font-size: 16px;
+  }
+  .keyboard-hint, .page-corner-hint {
+    font-size: 13px;
+  }
+  .cover-content h1 {
+    font-size: 1.5em;
+  }
+}
+
+/* Make navigation buttons touch-friendly */
+.page-btn {
+  min-width: 40px;
+  min-height: 40px;
+  font-size: 1.2em;
+}
+
+/* Hide hints on very small screens */
+@media (max-width: 400px) {
+  .keyboard-hint, .page-corner-hint {
+    display: none;
+  }
+}
+
+/* Initialize counter and set Bengali numerals */
+
+body {
+    counter-reset: page-number;
+}
+
+
+/* Counter styles for Bengali numerals */
+
+@counter-style bengali {
+    system: numeric;
+    symbols: "০" "১" "২" "৩" "৪" "৫" "৬" "৭" "৮" "৯";
+    suffix: "";
+}
+
+
+/* Increment counter for each page */
+
+.book-page,
+.writing-item.scene-item {
+    counter-increment: page-number;
+}
+
+/* Mobile-specific scrolling fixes */
+
+@media screen and (max-width: 768px) {
+  /* Fix vertical scrolling for turn.js pages */
+  .turn-page-wrapper {
+    overflow: visible !important;
+  }
+  
+  .turn-page {
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  /* Make individual page content scrollable */
+  .page-content {
+    max-height: none !important;
+    overflow-y: auto !important;
+  }
+  
+  /* Ensure book pages can scroll on mobile */
+  .book-page {
+    overflow-y: auto !important;
+    max-height: none !important;
+  }
+  
+  /* Fix the flipbook container to allow scrolling */
+  #flipbook {
+    overflow: visible !important;
+  }
+  
+  .flipbook-container {
+    overflow: visible;
+    height: auto !important;
+  }
+}

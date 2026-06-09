@@ -1,4 +1,4 @@
-"""FastAPI application with streaming support for Samim's chatbot."""
+"""FastAPI application for Samim's portfolio and streaming chatbot."""
 from fastapi import FastAPI, Request
 from fastapi.responses import StreamingResponse, FileResponse, Response
 from fastapi.staticfiles import StaticFiles
@@ -19,8 +19,30 @@ logger = logging.getLogger(__name__)
 app = FastAPI(title="Samim's AI Assistant")
 DATA_DIR = Path("data")
 CHROMA_DB_DIR = DATA_DIR / "chroma_db"
+CHAT_PAGE = Path("static/chat.html")
+PORTFOLIO_BUILD_DIR = Path("samim-reza/build")
+PORTFOLIO_INDEX = PORTFOLIO_BUILD_DIR / "index.html"
 
-app.mount("/static", StaticFiles(directory="static"), name="static")
+if (PORTFOLIO_BUILD_DIR / "static").exists():
+    app.mount(
+        "/static",
+        StaticFiles(directory=PORTFOLIO_BUILD_DIR / "static"),
+        name="portfolio-static",
+    )
+
+if (PORTFOLIO_BUILD_DIR / "assets").exists():
+    app.mount(
+        "/assets",
+        StaticFiles(directory=PORTFOLIO_BUILD_DIR / "assets"),
+        name="portfolio-assets",
+    )
+
+if (PORTFOLIO_BUILD_DIR / "writing").exists():
+    app.mount(
+        "/writing",
+        StaticFiles(directory=PORTFOLIO_BUILD_DIR / "writing", html=True),
+        name="portfolio-writing",
+    )
 
 app.add_middleware(
     CORSMiddleware,
@@ -46,11 +68,21 @@ async def startup_event():
 
 @app.get("/")
 async def index():
-    return FileResponse("static/chat.html")
+    if PORTFOLIO_INDEX.exists():
+        return FileResponse(PORTFOLIO_INDEX)
+    return FileResponse(CHAT_PAGE)
+
+
+@app.get("/chat")
+async def chat_page():
+    return FileResponse(CHAT_PAGE)
 
 
 @app.get("/favicon.ico")
 async def favicon():
+    portfolio_favicon = PORTFOLIO_BUILD_DIR / "favicon.ico"
+    if portfolio_favicon.exists():
+        return FileResponse(portfolio_favicon)
     return Response(status_code=204)
 
 
@@ -113,6 +145,15 @@ async def stream_chat(request: Request):
     except Exception as e:
         logger.error(f"Error processing request: {e}")
         return {"error": "Internal server error"}
+
+
+@app.get("/{path:path}")
+async def portfolio_fallback(path: str):
+    if path.startswith("api/"):
+        return Response(status_code=404)
+    if PORTFOLIO_INDEX.exists():
+        return FileResponse(PORTFOLIO_INDEX)
+    return Response(status_code=404)
 
 
 if __name__ == "__main__":

@@ -19,6 +19,10 @@ __pycache__/
 
 # Generated data
 data/chroma_db/
+samim-reza/node_modules/
+samim-reza/build/
+samim-reza/static/
+samim-reza/asset-manifest.json
 
 # Sensitive information  
 messages/

@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="bn">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>শামীম রেজা - লেখালেখি</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <link rel="stylesheet" href="writings.css" />
+    <!-- Google Fonts for Bengali -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+
+  <body>
+    <header>
+      <div class="container">
+        <nav class="navbar">
+          <a href="../index.html" class="logo">
+            <i class="fas fa-book-open"></i> Samim
+            <span>Reza</span>
+          </a>
+          <ul class="nav-links">
+            <li><a href="../index.html">পোর্টফোলিও</a></li>
+            <li><a href="writings.html">লেখালেখি</a></li>
+          </ul>
+        </nav>
+      </div>
+    </header>
+
+    <section>
+      <div class="container">
+        <div class="book-wrapper">
+          <!-- Index Sidebar -->
+          <div class="book-index">
+            <h3 class="index-title">সূচিপত্র</h3>
+            <div class="index-category">
+              <h4 class="category-title" id="subhe-tab" style="cursor: pointer">
+                <i class="fas fa-moon"></i> সুবহে সাদিক
+              </h4>
+              <ul class="index-list" id="subhe-list" style="display: none">
+                <li><a href="#" data-page="subhe1">সুবহে সাদিকঃ ১</a></li>
+                <li><a href="#" data-page="subhe2">সুবহে সাদিকঃ ২</a></li>
+                <li><a href="#" data-page="subhe3">হলুদ ফুল</a></li>
+                <!-- Add more subhe sadik links as needed -->
+              </ul>
+            </div>
+            <div class="index-category">
+              <h4
+                class="category-title"
+                id="desert-tab"
+                style="cursor: pointer"
+              >
+                <i class="fas fa-sun"></i> মরুভূমির দিন
+              </h4>
+              <ul class="index-list" id="desert-list" style="display: none">
+                <li><a href="#" data-page="desert1">মরুভূমির দিন - ১</a></li>
+                <!-- Add more desert day links as needed -->
+              </ul>
+            </div>
+            <div class="index-category">
+              <h4 class="category-title" id="ishi-tab" style="cursor: pointer">
+                <i class="fas fa-cloud-rain"></i> ইশি
+              </h4>
+              <ul class="index-list" id="ishi-list" style="display: none">
+                <li><a href="#" data-page="ishi1">বৃষ্টির জন্য অপেক্ষা</a></li>
+                <li><a href="#" data-page="ishi2">ঝড়ের রাত ও চা</a></li>
+                <li><a href="#" data-page="ishi4">বৃষ্টির দিনে টঙে</a></li>
+                <!-- Add more ishi links as needed -->
+              </ul>
+            </div>
+            <div class="index-category">
+              <h4 class="category-title" id="scene-tab" style="cursor: pointer">
+                <i class="fas fa-image"></i> দৃশ্যকল্প
+              </h4>
+              <ul class="index-list" id="scene-list" style="display: none">
+                <li><a href="#" data-page="scene1">তাঁর মায়া</a></li>
+                <li><a href="#" data-page="scene2">শীতের সকাল</a></li>
+                <li><a href="#" data-page="scene3">অপেক্ষা</a></li>
+                <li><a href="#" data-page="scene4">যুদ্ধের ময়দান</a></li>
+                <li><a href="#" data-page="scene5">স্বপ্নের দেশ</a></li>
+                <li><a href="#" data-page="scene6">যোদ্ধার অপেক্ষা</a></li>
+                <li><a href="#" data-page="scene7">নিদারুণ জ্বর</a></li>
+                <li><a href="#" data-page="scene8">সন্ধ্যে ও তুমি</a></li>
+                <li><a href="#" data-page="scene9">সমুদ্রের গল্প</a></li>
+                <li><a href="#" data-page="scene10">বারুদের গন্ধ</a></li>
+                <li><a href="#" data-page="scene11">ভায়োলিনের সুর</a></li>
+                <li><a href="#" data-page="scene12">অতিশয় জ্বর</a></li>
+                <li>
+                  <a href="#" data-page="scene13">শিউলি ফুল</a>
+                </li>
+                <li><a href="#" data-page="scene14">কবিতার পূর্বাভাস</a></li>
+                <li><a href="#" data-page="scene15">দরজা</a></li>
+                <!-- Add more scene links as needed -->
+              </ul>
+            </div>
+            <div class="index-category">
+              <h4 class="category-title" id="poem-tab" style="cursor: pointer">
+                <i class="fas fa-feather-alt"></i> কবিতা
+              </h4>
+              <ul class="index-list" id="poem-list" style="display: none">
+                <li><a href="#" data-page="poem1">অল্প কিছুদিন</a></li>
+                <li><a href="#" data-page="poem2">রাত্রি</a></li>
+                <li><a href="#" data-page="poem3">আগন্তুক</a></li>
+                <li><a href="#" data-page="poem4">তুমিই</a></li>
+                <li><a href="#" data-page="poem5">তোমার প্রেমিক</a></li>
+              </ul>
+            </div>
+          </div>
+
+          <!-- Book Container -->
+          <div class="flipbook-container">
+            <!-- Book Cover -->
+            <div id="book-cover" class="book-page book-cover">
+              <div class="book-spine"></div>
+              <div class="cover-content">
+                <h1>উপত্যকা</h1>
+                <p>কবিতা এবং দৃশ্যকল্প</p>
+                <div class="author-name">শামীম রেজা</div>
+                <div class="cover-icon"><i class="fas fa-feather-alt"></i></div>
+                <div class="open-book">
+                  শুরু <i class="fas fa-arrow-right"></i>
+                </div>
+              </div>
+            </div>
+
+            <!-- Navigation Controls -->
+            <div class="page-nav-controls">
+              <button id="prev-btn" class="page-btn" title="আগের পৃষ্ঠা">
+                <i class="fas fa-chevron-left"></i>
+              </button>
+              <span id="page-footer" class="page-indicator"></span>
+              <button id="next-btn" class="page-btn" title="পরের পৃষ্ঠা">
+                <i class="fas fa-chevron-right"></i>
+              </button>
+            </div>
+            <div class="keyboard-hint">
+              কীবোর্ডেও পাতা উল্টাতে পারেন: ← বাম, → ডান
+            </div>
+            <div class="page-corner-hint">
+              <!-- পাতার কোণ ধরে টেনেও উল্টাতে পারেন -->
+            </div>
+
+            <!-- Pages Container - Content will be loaded dynamically -->
+            <div id="flipbook" class="flipbook">
+              <!-- Content will be loaded by JavaScript -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <footer>
+      <div class="container">
+        <div class="footer-content">
+          <p>&copy; ২০২৫ শামীম রেজা। সর্বস্বত্ব সংরক্ষিত।</p>
+          <p><a href="../index.html">পোর্টফোলিও</a>তে ফিরে যান</p>
+        </div>
+      </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/turn.js/3/turn.min.js"></script>
+    <script src="js/writings-content.js"></script>
+    <script src="js/flipbook-manager.js"></script>
+  </body>
+</html>
+</html>
