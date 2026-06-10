@@ -60,7 +60,6 @@ FOLLOW_UP_PATTERNS = (
 
 class SamimBot:
     def __init__(self, max_history_turns: int = 6, compact_keep_turns: int = 4):
-        self.collection = get_collection()
         self.max_history_turns = max_history_turns
         self.compact_keep_turns = compact_keep_turns
         self.recent_turns: List[Dict[str, str]] = []
@@ -70,6 +69,11 @@ class SamimBot:
     @classmethod
     async def create(cls):
         return cls()
+
+    def _get_collection(self):
+        # Resolve a fresh Chroma handle so a recreated collection doesn't leave us
+        # holding a stale UUID-backed object after population or deploy steps.
+        return get_collection()
 
     def _load_profile(self) -> dict:
         try:
@@ -302,7 +306,7 @@ class SamimBot:
 
     def _keyword_rank_documents(self, question: str, limit: int) -> list[str]:
         query_tokens = tokenize(question)
-        all_docs = self.collection.get(include=["documents", "metadatas"])
+        all_docs = self._get_collection().get(include=["documents", "metadatas"])
         documents = all_docs.get("documents", [])
         metadatas = all_docs.get("metadatas", [])
         scored_docs: list[tuple[int, int, str]] = []
@@ -336,7 +340,7 @@ class SamimBot:
 
     async def _get_relevant_context(self, question: str, limit: int = 12) -> str:
         t_start = time.perf_counter()
-        result = self.collection.query(query_texts=[question], n_results=limit)
+        result = self._get_collection().query(query_texts=[question], n_results=limit)
         vector_docs = result.get("documents", [[]])[0]
         keyword_docs = self._keyword_rank_documents(question, limit=limit)
         documents: list[str] = []
