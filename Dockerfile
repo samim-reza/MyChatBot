@@ -1,14 +1,3 @@
-FROM node:20-alpine AS portfolio-build
-
-WORKDIR /app/samim-reza
-
-COPY samim-reza/package*.json ./
-RUN npm ci
-
-COPY samim-reza/ ./
-RUN npm run build
-
-
 FROM python:3.10-slim
 
 WORKDIR /app
@@ -23,7 +12,9 @@ RUN pip install --no-cache-dir --upgrade pip && \
     pip install --no-cache-dir -r requirements.txt
 
 COPY . .
-COPY --from=portfolio-build /app/samim-reza/build ./samim-reza/build
+
+RUN test -f samim-reza/build/index.html || \
+    (echo "Missing samim-reza/build/index.html. Run npm run build in samim-reza before docker build." && exit 1)
 
 RUN mkdir -p data/chroma_db
 

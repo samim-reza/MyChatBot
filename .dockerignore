@@ -23,7 +23,6 @@ __pycache__/
 .env
 venv/
 samim-reza/node_modules/
-samim-reza/build/
 samim-reza/static/
 samim-reza/asset-manifest.json
 samim-reza/.codex/

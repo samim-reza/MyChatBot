@@ -154,3 +154,4 @@ docker compose down
 - `data/chroma_db/` is generated data and is also ignored by git.
 - `data/personal.json` is the source of truth for the chatbot knowledge.
 - if you update `data/personal.json`, run `python populate_chroma.py` again.
+- `samim-reza/build/` is intentionally kept as a deploy artifact so the droplet can build the Docker image without running `npm ci` inside Docker.
