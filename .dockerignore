@@ -28,6 +28,9 @@ samim-reza/asset-manifest.json
 samim-reza/.codex/
 samim-reza/.agents/
 
+# Generated runtime data mounted as a volume by docker-compose.yml
+data/chroma_db/
+
 # Logs
 *.log
 

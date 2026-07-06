@@ -1,6 +1,12 @@
 #!/bin/bash
 set -e
 
+if [ "${PRUNE_DOCKER:-0}" = "1" ]; then
+  docker system df
+  docker builder prune -af
+  docker image prune -af
+fi
+
 echo "Git Pulling..."
 git pull
 
