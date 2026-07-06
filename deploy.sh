@@ -1,14 +1,8 @@
 #!/bin/bash
-set -e
-
-if [ "${PRUNE_DOCKER:-0}" = "1" ]; then
-  docker system df
-  docker builder prune -af
-  docker image prune -af
-fi
+set -euo pipefail
 
 echo "Git Pulling..."
-git pull
+git pull --ff-only
 
 echo "Building portfolio..."
 if [ "${BUILD_PORTFOLIO:-0}" = "1" ]; then
@@ -30,10 +24,26 @@ else
   exit 1
 fi
 
+if [ "${PRUNE_DOCKER:-0}" = "1" ]; then
+  echo "Pruning unused Docker build cache and images..."
+  docker system df
+  docker builder prune -af
+  docker image prune -af
+fi
+
 echo "Building API and HTTPS proxy..."
 docker compose up -d --build
 
-docker compose run --rm app python populate_chroma.py
+if [ "${POPULATE_CHROMA:-0}" = "1" ]; then
+  echo "Populating ChromaDB from data/personal.json..."
+  docker compose run --rm app python populate_chroma.py
+else
+  echo "Skipping ChromaDB population. Set POPULATE_CHROMA=1 to rebuild it."
+fi
 
 echo "App and HTTPS proxy logs..."
-docker compose logs -f app caddy
+docker compose logs --tail=100 app caddy
+
+if [ "${FOLLOW_LOGS:-0}" = "1" ]; then
+  docker compose logs -f app caddy
+fi

@@ -20,7 +20,6 @@ function Skills() {
                 <span className="skill-badge">SQL</span>
                 <span className="skill-badge">C++</span>
                 <span className="skill-badge">Java</span>
-                <span className="skill-badge">PHP</span>
               </div>
             </div>
 

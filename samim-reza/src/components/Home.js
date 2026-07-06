@@ -20,7 +20,7 @@ function Home({ onNavigate }) {
             <div className="about-intro">
               <p className="about-label">Welcome to my portfolio</p>
               <h2 className="about-title">
-                Senior AI Software Engineer at Sloancode
+                Senior AI Software Engineer at Sloancode, New York
               </h2>
             </div>
             

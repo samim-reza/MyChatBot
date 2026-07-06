@@ -4,7 +4,7 @@ function Experience() {
   const experiences = [
     {
       title: "Senior AI Software Engineer",
-      date: "Present",
+      date: "May 2026 - Present",
       subtitle: "Sloancode",
       points: [
         "Building a multi-tenant AI restaurant platform with FastAPI, PostgreSQL, Redis, ChromaDB, Twilio Media Streams, and OpenAI Realtime voice",
@@ -14,7 +14,7 @@ function Experience() {
     },
     {
       title: "Machine Learning Engineer",
-      date: "Feb 2025 - 2026",
+      date: "Feb 2025 - Present",
       subtitle: "Brandifies",
       points: [
         "Built ML pipelines for data preprocessing, feature engineering, model training, and evaluation",
