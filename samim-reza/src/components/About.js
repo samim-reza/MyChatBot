@@ -14,18 +14,17 @@ function About() {
             <div className="about-text" style={{gridColumn: '1 / -1', marginBottom: '24px'}}>
               <h3>Hello, I'm Samim Reza</h3>
               <p>
-                I am a Computer Science & Engineering graduate from Green University of
-                Bangladesh and currently working as a Machine Learning Engineer at Brandifies.
-                I have a strong passion for programming, machine learning, robotics, and
-                problem-solving. As a three-time ICPC regionalist with over 1000+
-                problems solved on various online judges, I have demonstrated
-                excellence in competitive programming.
+                I am a Senior AI Software Engineer at Sloancode, building production
+                AI SaaS systems that connect realtime voice agents, backend services,
+                data stores, integrations, dashboards, and operational workflows into
+                reliable business products.
               </p>
               <p>
-                Having served as a Teaching Assistant, Programming Trainer,
-                and Robotics Engineer Intern, I have gained valuable experience
-                tackling challenging problems and sharing my knowledge with others. My technical
-                expertise spans various programming languages, LLM integration, and competition.
+                My work combines FastAPI, PostgreSQL, Redis, Chroma-backed RAG,
+                Twilio Media Streams, OpenAI Realtime voice handling, POS integrations,
+                payment workflows, and system design. My competitive programming background
+                as a three-time ICPC regionalist with 1000+ solved problems still shapes
+                how I design, debug, and ship complex software.
               </p>
             </div>
 
@@ -47,7 +46,7 @@ function About() {
               <div className="stat-card">
                 <i className="fas fa-project-diagram"></i>
                 <div className="stat-info">
-                  <h4 className="stat-number">7+</h4>
+                  <h4 className="stat-number">13+</h4>
                   <p className="stat-label">Projects Completed</p>
                 </div>
               </div>

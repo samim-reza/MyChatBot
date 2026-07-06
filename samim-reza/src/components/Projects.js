@@ -10,6 +10,35 @@ function Projects() {
           <div className="projects-grid">
             <div className="project-card featured">
               <div className="project-icon">
+                <i className="fas fa-utensils"></i>
+              </div>
+              <div className="project-content">
+                <div className="project-header">
+                  <div>
+                    <span className="project-category">AI SaaS • Realtime Voice Platform</span>
+                    <h3 className="project-title">Sloancode AI Restaurant Platform</h3>
+                  </div>
+                  <span className="project-date"><i className="far fa-calendar"></i> 2026</span>
+                </div>
+                <p className="project-description">
+                  Multi-tenant restaurant AI phone receptionist platform with Twilio Media Streams,
+                  OpenAI Realtime voice, FastAPI, PostgreSQL, Redis, Chroma-backed RAG, tenant dashboards,
+                  deterministic order validation, POS integrations, Stripe payment links, and reporting.
+                </p>
+                <div className="project-tech">
+                  <span className="tech-tag">FastAPI</span>
+                  <span className="tech-tag">OpenAI Realtime</span>
+                  <span className="tech-tag">Twilio</span>
+                  <span className="tech-tag">PostgreSQL</span>
+                  <span className="tech-tag">Redis</span>
+                  <span className="tech-tag">ChromaDB</span>
+                  <span className="tech-tag">Stripe</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="project-card featured">
+              <div className="project-icon">
                 <i className="fas fa-robot"></i>
               </div>
               <div className="project-content">

@@ -20,16 +20,16 @@ function Home({ onNavigate }) {
             <div className="about-intro">
               <p className="about-label">Welcome to my portfolio</p>
               <h2 className="about-title">
-                Machine Learning Engineer | CSE Graduate
+                Senior AI Software Engineer at Sloancode
               </h2>
             </div>
             
             <p className="about-description">
-              Currently working as a Machine Learning Engineer at Brandifies.
-              {' '}
-              Focused on competitive programming, robotics, and applied AI & ML. 
-              As a three-time ICPC regionalist with 1000+ problems solved, I combine 
-              theoretical knowledge with practical applications in machine learning and robotics. 
+              Currently working on the Sloancode AI Restaurant Platform, a multi-tenant
+              SaaS system for restaurant AI phone receptionists. I build FastAPI,
+              PostgreSQL, Redis, Chroma-backed RAG, Twilio Media Streams, OpenAI
+              Realtime voice handling, restaurant dashboards, order validation,
+              POS integrations, Stripe payment workflows, and operational reporting.
               Try my{' '}
               <a href="/chat" className="inline-link">
                 AI Assistant

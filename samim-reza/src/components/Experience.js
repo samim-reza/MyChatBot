@@ -3,13 +3,23 @@ import React from 'react';
 function Experience() {
   const experiences = [
     {
+      title: "Senior AI Software Engineer",
+      date: "Present",
+      subtitle: "Sloancode",
+      points: [
+        "Building a multi-tenant AI restaurant platform with FastAPI, PostgreSQL, Redis, ChromaDB, Twilio Media Streams, and OpenAI Realtime voice",
+        "Designing tenant-specific AI behavior, order validation, CRM, kitchen flow, menus, promotions, dashboards, and reporting workflows",
+        "Integrating POS providers, Stripe payment links, SMS delivery, transfer workflows, API keys, evaluations, and operational logging"
+      ]
+    },
+    {
       title: "Machine Learning Engineer",
-      date: "Feb 2025 - Present",
+      date: "Feb 2025 - 2026",
       subtitle: "Brandifies",
       points: [
-        "Built end-to-end ML pipelines: data preprocessing, feature engineering, model training, and evaluation",
-        "Developed predictive models using XGBoost and similar boosting algorithms",
-        "Fine-tuned LLMs and implemented RAG-based chatbot systems with vector databases"
+        "Built ML pipelines for data preprocessing, feature engineering, model training, and evaluation",
+        "Developed predictive models using XGBoost and boosting-based algorithms",
+        "Implemented LLM and RAG chatbot systems with vector databases"
       ]
     },
     {
