@@ -1,7 +1,7 @@
 export const quotes = [
   {
-    quote: `A man who is master of patience is master of everything else.`,
-    author: 'George Savile',
+    quote: `Secrets are precious they loose value when revealed`,
+    author: 'Self quote',
   },
   {
     quote: `You have a right to perform your prescribed duty, but you are not
