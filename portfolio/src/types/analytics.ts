@@ -6,7 +6,10 @@
  * all derive from this map automatically, so the rest of the app stays type-safe
  * and the taxonomy scales without touching the hook.
  *
- * Umami's `track(name, data)` only accepts flat primitive values, so every
+ * Analytics events stay flat so they can be forwarded directly to GA4 as event
+ * params without any extra serialization work.
+ *
+ * Google Analytics event params should stay flat (string | number | boolean), so every
  * shape below must stay flat (string | number | boolean).
  */
 export type AnalyticsEventData = {
