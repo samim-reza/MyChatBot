@@ -7,6 +7,7 @@ import json
 import logging
 import os
 from pathlib import Path
+from typing import Optional
 from dotenv import load_dotenv
 from bot_chroma import SamimBot
 from services.chroma_service import get_collection, COLLECTION_NAME
@@ -20,29 +21,29 @@ app = FastAPI(title="Samim's AI Assistant")
 DATA_DIR = Path("data")
 CHROMA_DB_DIR = DATA_DIR / "chroma_db"
 CHAT_PAGE = Path("static/chat.html")
-PORTFOLIO_BUILD_DIR = Path("samim-reza/build")
+PORTFOLIO_BUILD_DIR = Path("portfolio/out")
 PORTFOLIO_INDEX = PORTFOLIO_BUILD_DIR / "index.html"
 
-if (PORTFOLIO_BUILD_DIR / "static").exists():
-    app.mount(
-        "/static",
-        StaticFiles(directory=PORTFOLIO_BUILD_DIR / "static"),
-        name="portfolio-static",
-    )
 
-if (PORTFOLIO_BUILD_DIR / "assets").exists():
-    app.mount(
-        "/assets",
-        StaticFiles(directory=PORTFOLIO_BUILD_DIR / "assets"),
-        name="portfolio-assets",
-    )
+def _mount_portfolio_assets():
+    if (PORTFOLIO_BUILD_DIR / "_next").exists():
+        app.mount(
+            "/_next",
+            StaticFiles(directory=PORTFOLIO_BUILD_DIR / "_next"),
+            name="portfolio-next",
+        )
 
-if (PORTFOLIO_BUILD_DIR / "writing").exists():
-    app.mount(
-        "/writing",
-        StaticFiles(directory=PORTFOLIO_BUILD_DIR / "writing", html=True),
-        name="portfolio-writing",
-    )
+    for folder in ("assets", "meta", "project", "company", "certificates", "blog"):
+        asset_dir = PORTFOLIO_BUILD_DIR / folder
+        if asset_dir.exists():
+            app.mount(
+                f"/{folder}",
+                StaticFiles(directory=asset_dir),
+                name=f"portfolio-{folder}",
+            )
+
+
+_mount_portfolio_assets()
 
 app.add_middleware(
     CORSMiddleware,
@@ -66,6 +67,25 @@ async def startup_event():
         raise
 
 
+def _resolve_portfolio_page(path: str) -> Optional[Path]:
+    if not PORTFOLIO_BUILD_DIR.exists():
+        return None
+
+    clean_path = path.strip("/")
+    if not clean_path:
+        return PORTFOLIO_INDEX if PORTFOLIO_INDEX.exists() else None
+
+    direct = PORTFOLIO_BUILD_DIR / clean_path
+    if direct.is_file():
+        return direct
+
+    html_file = PORTFOLIO_BUILD_DIR / clean_path / "index.html"
+    if html_file.exists():
+        return html_file
+
+    return None
+
+
 @app.get("/")
 async def index():
     if PORTFOLIO_INDEX.exists():
@@ -80,9 +100,12 @@ async def chat_page():
 
 @app.get("/favicon.ico")
 async def favicon():
-    portfolio_favicon = PORTFOLIO_BUILD_DIR / "favicon.ico"
-    if portfolio_favicon.exists():
-        return FileResponse(portfolio_favicon)
+    for candidate in (
+        PORTFOLIO_BUILD_DIR / "favicon.ico",
+        PORTFOLIO_BUILD_DIR / "assets" / "samim-pixel-avatar.png",
+    ):
+        if candidate.exists():
+            return FileResponse(candidate)
     return Response(status_code=204)
 
 
@@ -106,7 +129,9 @@ async def debug_config():
             "document_count": doc_count,
             "bot_initialized": bot_instance is not None,
             "embeddings_type": "Hash-based (lightweight, no ML dependencies)",
-            "llm": "Groq llama-3.1-8b-instant",
+            "llm_primary": os.getenv("GROQ_MODEL_PRIMARY", "openai/gpt-oss-120b"),
+            "llm_fallback": os.getenv("GROQ_MODEL_FALLBACK", "openai/gpt-oss-20b"),
+            "portfolio_dir": str(PORTFOLIO_BUILD_DIR),
         }
     except Exception as e:
         return {"status": "error", "error": str(e), "bot_initialized": bot_instance is not None}
@@ -151,8 +176,14 @@ async def stream_chat(request: Request):
 async def portfolio_fallback(path: str):
     if path.startswith("api/"):
         return Response(status_code=404)
+
+    page = _resolve_portfolio_page(path)
+    if page:
+        return FileResponse(page)
+
     if PORTFOLIO_INDEX.exists():
         return FileResponse(PORTFOLIO_INDEX)
+
     return Response(status_code=404)
 
 

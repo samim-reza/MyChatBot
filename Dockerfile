@@ -1,3 +1,13 @@
+FROM node:20-alpine AS portfolio-build
+
+WORKDIR /build
+COPY portfolio/package.json portfolio/bun.lock* portfolio/package-lock.json* ./
+RUN npm ci --no-audit --no-fund --ignore-scripts
+
+COPY portfolio/ ./
+ENV NEXT_PUBLIC_URL=https://samimreza.me
+RUN npm run build
+
 FROM python:3.10-slim
 
 WORKDIR /app
@@ -9,14 +19,14 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 COPY requirements.txt .
-
 RUN pip install --no-cache-dir --upgrade pip && \
     pip install --no-cache-dir -r requirements.txt
 
 COPY . .
+COPY --from=portfolio-build /build/out ./portfolio/out
 
-RUN test -f samim-reza/build/index.html || \
-    (echo "Missing samim-reza/build/index.html. Run npm run build in samim-reza before docker build." && exit 1)
+RUN test -f portfolio/out/index.html || \
+    (echo "Missing portfolio/out/index.html. Portfolio build failed." && exit 1)
 
 RUN mkdir -p data/chroma_db
 

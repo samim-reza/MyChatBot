@@ -1,6 +1,8 @@
 # Environment variables
 .env
 .env.*
+!.env.example
+!portfolio/.env.example
 
 # Python virtual environment
 venv/
@@ -19,9 +21,19 @@ __pycache__/
 
 # Generated data
 data/chroma_db/
-samim-reza/node_modules/
-samim-reza/static/
-samim-reza/asset-manifest.json
+portfolio/.git/
+portfolio/.vercel/
+portfolio/coverage/
+portfolio/node_modules/
+portfolio/out/
+portfolio/.next/
+portfolio/npm-debug.log*
+portfolio/yarn-debug.log*
+portfolio/yarn-error.log*
+portfolio/.pnpm-debug.log*
+
+# Docker image tarball (built locally, uploaded to VPS)
+image
 
 # Sensitive information  
 messages/

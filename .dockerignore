@@ -1,8 +1,11 @@
 # Docker ignore for FAST build (includes venv)
-# Git
+# Git and repo-local tooling
 .git
+**/.git
 .gitignore
 .github
+.agents
+.codex
 
 # Python cache
 __pycache__/
@@ -21,12 +24,19 @@ __pycache__/
 
 # Environment
 .env
+.env.*
 venv/
-samim-reza/node_modules/
-samim-reza/static/
-samim-reza/asset-manifest.json
-samim-reza/.codex/
-samim-reza/.agents/
+portfolio/.env*
+portfolio/.husky/
+portfolio/.vercel/
+portfolio/coverage/
+portfolio/node_modules/
+portfolio/out/
+portfolio/.next/
+portfolio/npm-debug.log*
+portfolio/yarn-debug.log*
+portfolio/yarn-error.log*
+portfolio/.pnpm-debug.log*
 
 # Generated runtime data mounted as a volume by docker-compose.yml
 data/chroma_db/
@@ -43,4 +53,7 @@ chroma_db.backup/
 
 # Personal info (keep this excluded for security)
 data/personal.json
+data/cv.tex
+messages/
 credentials.txt
+for_github.json

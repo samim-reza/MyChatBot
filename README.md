@@ -9,7 +9,7 @@ Single-domain portfolio and personal RAG chatbot for Samim Reza.
 
 ## What it does
 
-- serves the React portfolio from the FastAPI app
+- serves the Next.js portfolio from `portfolio/out` via FastAPI
 - answers questions about Samim from structured profile data
 - streams responses in the browser
 - keeps short-term chat context with compacted conversation memory
@@ -21,7 +21,7 @@ Single-domain portfolio and personal RAG chatbot for Samim Reza.
 - FastAPI
 - Groq API
 - ChromaDB
-- React
+- React / Next.js (`portfolio/`)
 - Docker / Docker Compose
 - Caddy for HTTPS
 
@@ -34,17 +34,13 @@ MyChatBot/
 ├── Caddyfile
 ├── Dockerfile
 ├── docker-compose.yml
+├── deploy.sh
 ├── populate_chroma.py
 ├── requirements.txt
+├── portfolio/          # Next.js portfolio
 ├── data/
 │   ├── personal.json
 │   └── chroma_db/
-├── samim-reza/
-│   ├── public/
-│   ├── src/
-│   ├── writing/
-│   ├── package-lock.json
-│   └── package.json
 ├── services/
 │   ├── chroma_service.py
 │   ├── date_utils.py
@@ -75,7 +71,7 @@ python3 -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
 python3 populate_chroma.py
-cd samim-reza
+cd portfolio
 npm ci
 npm run build
 cd ..
@@ -154,4 +150,4 @@ docker compose down
 - `data/chroma_db/` is generated data and is also ignored by git.
 - `data/personal.json` is the source of truth for the chatbot knowledge.
 - if you update `data/personal.json`, run `python populate_chroma.py` again.
-- `samim-reza/build/` is intentionally kept as a deploy artifact so the droplet can build the Docker image without running `npm ci` inside Docker.
+- `portfolio/out/` is generated during the Next.js export build and served by FastAPI.
