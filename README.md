@@ -98,6 +98,32 @@ docker compose run --rm app python populate_chroma.py
 docker compose logs -f app caddy
 ```
 
+## Deployment (low-memory friendly)
+
+The Next.js build inside the Docker image needs ~2GB of RAM, which used to
+fill up small VPSes and kill the deploy. To avoid that, GitHub Actions
+(`.github/workflows/docker-publish.yml`) builds the image on every push to
+`master` and publishes it to `ghcr.io/samim-reza/mychatbot:latest`. The VPS
+then only pulls and runs it — no build happens on the server.
+
+One-time setup:
+
+1. push to GitHub and let the `Build and publish Docker image` workflow finish
+2. make the GHCR package public (repo → Packages → mychatbot → settings), or
+   run `docker login ghcr.io` on the VPS with a personal access token
+   (`read:packages` scope)
+
+Deploying on the VPS:
+
+```bash
+./deploy.sh                     # pulls the prebuilt image (default)
+DEPLOY_MODE=build ./deploy.sh   # builds locally instead (needs ~2GB RAM)
+POPULATE_CHROMA=1 ./deploy.sh   # also rebuilds the vector database
+```
+
+If the pull fails (e.g. workflow not finished yet), `deploy.sh` warns and
+falls back to a local build.
+
 ## DigitalOcean deployment
 
 On the droplet:
@@ -116,7 +142,7 @@ Commands:
 git clone https://github.com/samim-reza/MyChatBot.git
 cd MyChatBot
 mkdir -p data/chroma_db
-docker compose up -d --build
+./deploy.sh
 docker compose run --rm app python populate_chroma.py
 docker compose logs -f app caddy
 ```

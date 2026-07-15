@@ -1,5 +1,9 @@
 services:
   app:
+    # Deploys pull this prebuilt image (published by GitHub Actions) so the
+    # VPS never has to run the memory-hungry Next.js build itself.
+    # `docker compose up -d --build` still builds locally when needed.
+    image: ghcr.io/samim-reza/mychatbot:latest
     build:
       context: .
       dockerfile: Dockerfile

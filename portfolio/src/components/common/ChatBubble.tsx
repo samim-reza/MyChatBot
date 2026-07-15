@@ -41,11 +41,17 @@ const initialMessages: Message[] = [
   },
 ];
 
+const createSessionId = () =>
+  typeof crypto !== 'undefined' && 'randomUUID' in crypto
+    ? crypto.randomUUID()
+    : `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+
 const ChatBubble: React.FC = () => {
   const [messages, setMessages] = useState<Message[]>(initialMessages);
   const [newMessage, setNewMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
+  const sessionIdRef = useRef<string>(createSessionId());
   const { triggerHaptic, isMobile } = useHapticFeedback();
   const { trackEvent } = useUmami();
 
@@ -61,103 +67,56 @@ const ChatBubble: React.FC = () => {
     }
   }, [messages]);
 
-  const handleSendMessage = async () => {
-    if (!newMessage.trim() || isLoading) return;
+  const timestamp = () =>
+    new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
-    // Trigger haptic feedback on mobile devices
+  const submitMessage = async (messageText: string, haptic: 'light' | 'selection') => {
+    if (!messageText.trim() || isLoading) return;
+
     if (isMobile()) {
-      triggerHaptic('light');
+      triggerHaptic(haptic);
     }
 
-    const messageText = newMessage.trim();
     trackEvent({
       name: 'chat_message_sent',
       data: { message: messageText, sender: 'user' },
     });
+
     const userMessage: Message = {
       id: Date.now(),
       text: messageText,
       sender: 'user',
-      timestamp: new Date().toLocaleTimeString([], {
-        hour: '2-digit',
-        minute: '2-digit',
-      }),
+      timestamp: timestamp(),
     };
 
-    setMessages((prev) => [...prev, userMessage]);
-    setNewMessage('');
-    setIsLoading(true);
-
-    // Create a temporary bot message for streaming
+    // Temporary bot message that fills in as the response streams
     const botMessageId = Date.now() + 1;
     const botMessage: Message = {
       id: botMessageId,
       text: '',
       sender: 'bot',
-      timestamp: new Date().toLocaleTimeString([], {
-        hour: '2-digit',
-        minute: '2-digit',
-      }),
+      timestamp: timestamp(),
       isStreaming: true,
     };
 
-    setMessages((prev) => [...prev, botMessage]);
+    setMessages((prev) => [...prev, userMessage, botMessage]);
+    setNewMessage('');
+    setIsLoading(true);
 
-    // Send the message using the refactored function
     await sendMessage(messageText, botMessageId);
   };
 
-  const handleKeyPress = (e: React.KeyboardEvent) => {
+  const handleSendMessage = () => submitMessage(newMessage.trim(), 'light');
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       handleSendMessage();
     }
   };
 
-  const handleSuggestionClick = (suggestion: string) => {
-    // Trigger haptic feedback on mobile devices
-    if (isMobile()) {
-      triggerHaptic('selection');
-    }
-
-    trackEvent({
-      name: 'chat_message_sent',
-      data: { message: suggestion, sender: 'user' },
-    });
-
-    setNewMessage(suggestion);
-    // Auto-send the suggestion
-    const userMessage: Message = {
-      id: Date.now(),
-      text: suggestion,
-      sender: 'user',
-      timestamp: new Date().toLocaleTimeString([], {
-        hour: '2-digit',
-        minute: '2-digit',
-      }),
-    };
-
-    setMessages((prev) => [...prev, userMessage]);
-    setIsLoading(true);
-
-    // Create a temporary bot message for streaming
-    const botMessageId = Date.now() + 1;
-    const botMessage: Message = {
-      id: botMessageId,
-      text: '',
-      sender: 'bot',
-      timestamp: new Date().toLocaleTimeString([], {
-        hour: '2-digit',
-        minute: '2-digit',
-      }),
-      isStreaming: true,
-    };
-
-    setMessages((prev) => [...prev, botMessage]);
-
-    // Send the message (reuse the same logic as handleSendMessage)
-    sendMessage(suggestion, botMessageId);
-  };
+  const handleSuggestionClick = (suggestion: string) =>
+    submitMessage(suggestion, 'selection');
 
   const sendMessage = async (messageText: string, botMessageId: number) => {
     try {
@@ -168,6 +127,7 @@ const ChatBubble: React.FC = () => {
         },
         body: JSON.stringify({
           question: messageText,
+          session_id: sessionIdRef.current,
         }),
       });
 
@@ -183,40 +143,48 @@ const ChatBubble: React.FC = () => {
       }
 
       let accumulatedText = '';
+      let buffer = '';
 
       while (true) {
         const { done, value } = await reader.read();
 
         if (done) break;
 
-        const chunk = decoder.decode(value);
-        const lines = chunk.split('\n');
+        // Buffer partial lines: an SSE event can be split across reads
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split('\n');
+        buffer = lines.pop() ?? '';
 
         for (const line of lines) {
-          if (line.startsWith('data: ')) {
-            try {
-              const data = JSON.parse(line.slice(6));
+          if (!line.startsWith('data: ')) continue;
 
-              if (data.type === 'error') {
-                throw new Error(data.content);
-              }
+          let data;
+          try {
+            data = JSON.parse(line.slice(6));
+          } catch {
+            continue;
+          }
 
-              if (data.type === 'chunk' && data.content) {
-                accumulatedText += data.content;
+          if (data.type === 'error') {
+            throw new Error(data.content);
+          }
 
-                setMessages((prev) =>
-                  prev.map((msg) =>
-                    msg.id === botMessageId
-                      ? { ...msg, text: accumulatedText, isStreaming: true }
-                      : msg,
-                  ),
-                );
-              }
-            } catch {
-              continue;
-            }
+          if (data.type === 'chunk' && data.content) {
+            accumulatedText += data.content;
+
+            setMessages((prev) =>
+              prev.map((msg) =>
+                msg.id === botMessageId
+                  ? { ...msg, text: accumulatedText, isStreaming: true }
+                  : msg,
+              ),
+            );
           }
         }
+      }
+
+      if (!accumulatedText) {
+        throw new Error('Empty response');
       }
 
       setMessages((prev) =>
@@ -382,7 +350,7 @@ const ChatBubble: React.FC = () => {
             placeholder="Ask me about my work and experience..."
             value={newMessage}
             onChange={(e) => setNewMessage(e.target.value)}
-            onKeyPress={handleKeyPress}
+            onKeyDown={handleKeyDown}
             disabled={isLoading}
             className="flex-1"
           />

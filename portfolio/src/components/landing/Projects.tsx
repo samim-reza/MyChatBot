@@ -17,6 +17,7 @@ export default function Projects() {
       <ProjectList className="mt-8" projects={projects.slice(0, 4)} />
       <div className="mt-8 flex justify-center">
         <Button
+          asChild
           variant="outline"
           track={{
             name: 'button_click',

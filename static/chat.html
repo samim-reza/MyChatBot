@@ -583,6 +583,9 @@
 
     <script>
         let currentBotMessage = null;
+        const chatSessionId = (typeof crypto !== 'undefined' && crypto.randomUUID)
+            ? crypto.randomUUID()
+            : `${Date.now()}-${Math.random().toString(36).slice(2)}`;
 
         function linkify(text) {
             const urlRegex = /(https?:\/\/[^\s]+)/g;
@@ -657,7 +660,7 @@
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({ question: message })
+                    body: JSON.stringify({ question: message, session_id: chatSessionId })
                 });
 
                 if (!response.ok) {

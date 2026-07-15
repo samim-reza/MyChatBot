@@ -9,13 +9,16 @@ import os
 from pathlib import Path
 from typing import Optional
 from dotenv import load_dotenv
-from bot_chroma import SamimBot
+from bot_chroma import SessionManager
 from services.chroma_service import get_collection, COLLECTION_NAME
+from services.groq_service import GROQ_MODEL_PRIMARY, GROQ_MODEL_FALLBACK
 
 load_dotenv()
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+
+MAX_QUESTION_LENGTH = 2000
 
 app = FastAPI(title="Samim's AI Assistant")
 DATA_DIR = Path("data")
@@ -53,18 +56,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-bot_instance = None
-
-
-@app.on_event("startup")
-async def startup_event():
-    global bot_instance
-    try:
-        bot_instance = await SamimBot.create()
-        logger.info("Bot initialized successfully")
-    except Exception as e:
-        logger.error(f"Error initializing bot: {e}")
-        raise
+sessions = SessionManager()
 
 
 def _resolve_portfolio_page(path: str) -> Optional[Path]:
@@ -127,32 +119,33 @@ async def debug_config():
             "chroma_db_exists": CHROMA_DB_DIR.exists(),
             "chroma_db_path": str(CHROMA_DB_DIR.absolute()) if CHROMA_DB_DIR.exists() else "Not created",
             "document_count": doc_count,
-            "bot_initialized": bot_instance is not None,
             "embeddings_type": "Hash-based (lightweight, no ML dependencies)",
-            "llm_primary": os.getenv("GROQ_MODEL_PRIMARY", "openai/gpt-oss-120b"),
-            "llm_fallback": os.getenv("GROQ_MODEL_FALLBACK", "openai/gpt-oss-20b"),
+            "llm_primary": GROQ_MODEL_PRIMARY,
+            "llm_fallback": GROQ_MODEL_FALLBACK,
             "portfolio_dir": str(PORTFOLIO_BUILD_DIR),
         }
     except Exception as e:
-        return {"status": "error", "error": str(e), "bot_initialized": bot_instance is not None}
+        return {"status": "error", "error": str(e)}
 
 
 @app.post("/api/chat/stream")
 async def stream_chat(request: Request):
     try:
         data = await request.json()
-        question = data.get("question", "")
+        question = str(data.get("question", "")).strip()
+        session_id = str(data.get("session_id", "")) or (request.client.host if request.client else "anonymous")
 
         if not question:
             return {"error": "No question provided"}
-        if not bot_instance:
-            return {"error": "Bot not initialized"}
+        if len(question) > MAX_QUESTION_LENGTH:
+            return {"error": f"Question too long (max {MAX_QUESTION_LENGTH} characters)"}
 
-        logger.info(f"Received query: {question}")
+        bot = sessions.get_bot(session_id)
+        logger.info(f"Received query ({session_id[:8]}): {question}")
 
         async def generate_response():
             try:
-                async for chunk in bot_instance.ask_bot(question):
+                async for chunk in bot.ask_bot(question):
                     yield f"data: {json.dumps(chunk)}\n\n"
             except Exception as e:
                 logger.error(f"Error generating response: {e}")

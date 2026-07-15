@@ -6,17 +6,12 @@ RUN npm ci --no-audit --no-fund --ignore-scripts
 
 COPY portfolio/ ./
 ENV NEXT_PUBLIC_URL=https://samimreza.me
+ENV NEXT_TELEMETRY_DISABLED=1
 RUN npm run build
 
 FROM python:3.10-slim
 
 WORKDIR /app
-
-ENV DEBIAN_FRONTEND=noninteractive
-
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    build-essential \
-    && rm -rf /var/lib/apt/lists/*
 
 COPY requirements.txt .
 RUN pip install --no-cache-dir --upgrade pip && \

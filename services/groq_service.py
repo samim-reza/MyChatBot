@@ -1,5 +1,6 @@
 """Groq LLM streaming via OpenAI-compatible API."""
 import json
+import logging
 import os
 from typing import AsyncGenerator
 
@@ -9,8 +10,12 @@ from services.date_utils import build_birthday_context
 
 load_dotenv()
 
+logger = logging.getLogger(__name__)
+
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 GROQ_BASE_URL = "https://api.groq.com/openai/v1"
+GROQ_MODEL_PRIMARY = os.getenv("GROQ_MODEL_PRIMARY", "llama-3.1-8b-instant")
+GROQ_MODEL_FALLBACK = os.getenv("GROQ_MODEL_FALLBACK", "llama-3.3-70b-versatile")
 
 RAG_PROMPT = """You are Samim Reza. Respond as Samim in first person so the conversation feels natural and direct.
 
@@ -40,26 +45,12 @@ Question:
 Answer (respond naturally in first person, using ONLY the context above):"""
 
 
-async def stream_response(
-    question: str,
-    context: str,
-    chat_history: str,
-    model: str = "llama-3.1-8b-instant",
-    temperature: float = 0.5,
-    max_tokens: int = 300,
+async def _stream_completion(
+    prompt: str,
+    model: str,
+    temperature: float,
+    max_tokens: int,
 ) -> AsyncGenerator[str, None]:
-    if not GROQ_API_KEY:
-        raise ValueError("GROQ_API_KEY is not set")
-
-    birthday_context = build_birthday_context()
-    prompt = RAG_PROMPT.format(
-        current_date=birthday_context["current_date"],
-        age=birthday_context["age"],
-        chat_history=chat_history or "None",
-        context=context or "No relevant context found.",
-        question=question,
-    )
-
     async with httpx.AsyncClient(timeout=60.0) as client:
         async with client.stream(
             "POST",
@@ -88,3 +79,39 @@ async def stream_response(
                 content = delta.get("content")
                 if content:
                     yield content
+
+
+async def stream_response(
+    question: str,
+    context: str,
+    chat_history: str,
+    temperature: float = 0.5,
+    max_tokens: int = 300,
+) -> AsyncGenerator[str, None]:
+    if not GROQ_API_KEY:
+        raise ValueError("GROQ_API_KEY is not set")
+
+    birthday_context = build_birthday_context()
+    prompt = RAG_PROMPT.format(
+        current_date=birthday_context["current_date"],
+        age=birthday_context["age"],
+        chat_history=chat_history or "None",
+        context=context or "No relevant context found.",
+        question=question,
+    )
+
+    started_streaming = False
+    try:
+        async for content in _stream_completion(prompt, GROQ_MODEL_PRIMARY, temperature, max_tokens):
+            started_streaming = True
+            yield content
+        return
+    except (httpx.HTTPError, json.JSONDecodeError, KeyError) as exc:
+        # Only retry with the fallback model if nothing was sent yet;
+        # otherwise the client would see a duplicated answer.
+        if started_streaming or GROQ_MODEL_FALLBACK == GROQ_MODEL_PRIMARY:
+            raise
+        logger.warning(f"Primary model {GROQ_MODEL_PRIMARY} failed ({exc}); retrying with {GROQ_MODEL_FALLBACK}")
+
+    async for content in _stream_completion(prompt, GROQ_MODEL_FALLBACK, temperature, max_tokens):
+        yield content

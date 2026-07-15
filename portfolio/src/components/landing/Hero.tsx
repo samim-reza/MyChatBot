@@ -1,6 +1,5 @@
 import { heroConfig, skillComponents, socialLinks } from '@/config/Hero';
 import { parseTemplate } from '@/lib/hero';
-import { cn } from '@/lib/utils';
 import Image from 'next/image';
 import Link from 'next/link';
 import React from 'react';
@@ -80,18 +79,18 @@ export default function Hero() {
           return (
             <Button
               key={index}
+              asChild
               variant={button.variant as 'outline' | 'default'}
-              className={cn(
-                button.variant === 'outline' && 'inset-shadow-indigo-500',
-                button.variant === 'default' && 'inset-shadow-indigo-500',
-              )}
+              className="inset-shadow-indigo-500"
               track={{
                 name: 'button_click',
                 data: { buttonId: button.text, section: 'hero' },
               }}
             >
-              {IconComponent && <IconComponent />}
-              <Link href={button.href}>{button.text}</Link>
+              <Link href={button.href}>
+                {IconComponent && <IconComponent />}
+                {button.text}
+              </Link>
             </Button>
           );
         })}

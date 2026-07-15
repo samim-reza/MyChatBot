@@ -1,6 +1,7 @@
 """Lightweight RAG chatbot using ChromaDB + Groq API."""
 from typing import AsyncGenerator, Dict, List
 from datetime import date
+from functools import lru_cache
 import json
 import logging
 from pathlib import Path
@@ -66,16 +67,14 @@ class SamimBot:
         self.compacted_history = ""
         self.profile = self._load_profile()
 
-    @classmethod
-    async def create(cls):
-        return cls()
-
     def _get_collection(self):
         # Resolve a fresh Chroma handle so a recreated collection doesn't leave us
         # holding a stale UUID-backed object after population or deploy steps.
         return get_collection()
 
-    def _load_profile(self) -> dict:
+    @staticmethod
+    @lru_cache(maxsize=1)
+    def _load_profile() -> dict:
         try:
             with PROFILE_PATH.open("r", encoding="utf-8") as file:
                 return json.load(file)
@@ -406,3 +405,39 @@ class SamimBot:
         except Exception as e:
             logger.error(f"[ERROR] ask_bot: {e}")
             yield {"type": "error", "content": str(e)}
+
+
+class SessionManager:
+    """Keeps one SamimBot (and its chat history) per visitor session.
+
+    Without this every visitor shared a single global history, so answers
+    from one visitor leaked into another's follow-up questions.
+    """
+
+    def __init__(self, ttl_seconds: int = 1800, max_sessions: int = 500):
+        self.ttl_seconds = ttl_seconds
+        self.max_sessions = max_sessions
+        self._sessions: Dict[str, Dict] = {}
+
+    def _evict(self) -> None:
+        now = time.monotonic()
+        expired = [
+            key
+            for key, entry in self._sessions.items()
+            if now - entry["last_used"] > self.ttl_seconds
+        ]
+        for key in expired:
+            del self._sessions[key]
+
+        while len(self._sessions) >= self.max_sessions:
+            oldest = min(self._sessions, key=lambda key: self._sessions[key]["last_used"])
+            del self._sessions[oldest]
+
+    def get_bot(self, session_id: str) -> SamimBot:
+        self._evict()
+        entry = self._sessions.get(session_id)
+        if entry is None:
+            entry = {"bot": SamimBot()}
+            self._sessions[session_id] = entry
+        entry["last_used"] = time.monotonic()
+        return entry["bot"]

@@ -20,6 +20,7 @@ export default function Blog() {
       </div>
       <div className="mt-8 flex justify-center">
         <Button
+          asChild
           variant="outline"
           track={{
             name: 'button_click',
