@@ -1,8 +1,8 @@
 name: Build and publish Docker image
 
-# GitHub builds the Docker image (Next.js + FastAPI). This cPanel host cannot
-# run Docker, so a follow-up job copies the built static site out of the image
-# and uploads it through cPanel's HTTPS API. The server never compiles anything.
+# Builds the full image (Next.js portfolio + FastAPI) on GitHub and publishes
+# it to GHCR. A machine with Docker can then pull and run it with no local
+# Next.js build. This cPanel account cannot run Docker containers.
 on:
   push:
     branches: [master]
@@ -41,50 +41,3 @@ jobs:
             ${{ env.IMAGE_NAME }}:${{ github.sha }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
-
-  deploy-cpanel:
-    needs: build-and-push
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      packages: read
-    steps:
-      - name: Log in to GHCR
-        uses: docker/login-action@v3
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Extract static site from image
-        run: |
-          docker pull "${{ env.IMAGE_NAME }}:${{ github.sha }}"
-          cid=$(docker create "${{ env.IMAGE_NAME }}:${{ github.sha }}")
-          docker cp "$cid":/app/portfolio/out ./site
-          docker rm "$cid"
-          test -f site/index.html
-          ls -la site
-
-      - name: Upload to cPanel over HTTPS API
-        env:
-          CPANEL_TOKEN: ${{ secrets.CPANEL_API_TOKEN }}
-          CPANEL_HOST: ${{ secrets.CPANEL_HOST }}
-          CPANEL_USERNAME: ${{ secrets.CPANEL_USERNAME }}
-        run: |
-          set -euo pipefail
-          (cd site && zip -qr ../site.zip .)
-          AUTH="Authorization: cpanel ${CPANEL_USERNAME}:${CPANEL_TOKEN}"
-          BASE="https://${CPANEL_HOST}:2083/execute"
-          upload=$(curl -sS --fail-with-body --connect-timeout 30 -X POST \
-            -H "$AUTH" \
-            -F "dir=/home/${CPANEL_USERNAME}/samimreza.me" \
-            -F "file-1=@site.zip" \
-            "$BASE/Fileman/upload_files")
-          echo "$upload" | python3 -c 'import json,sys; d=json.load(sys.stdin); assert d.get("status")==1, d'
-          extract=$(curl -sS --fail-with-body --connect-timeout 30 -G \
-            -H "$AUTH" \
-            --data-urlencode "op=extract" \
-            --data-urlencode "sourcefiles=/home/${CPANEL_USERNAME}/samimreza.me/site.zip" \
-            --data-urlencode "destfiles=/home/${CPANEL_USERNAME}/samimreza.me" \
-            "$BASE/Fileman/fileop")
-          echo "$extract" | python3 -c 'import json,sys; d=json.load(sys.stdin); assert d.get("status")==1, d'
