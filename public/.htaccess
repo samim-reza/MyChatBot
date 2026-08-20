@@ -1,0 +1,8 @@
+Options -Indexes
+DirectoryIndex index.html
+
+RewriteEngine On
+
+# Force HTTPS when Apache/LiteSpeed still fronts the site
+RewriteCond %{HTTPS} !=on
+RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]

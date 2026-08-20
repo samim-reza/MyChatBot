@@ -1,43 +1,35 @@
-# Environment variables
+# Dependencies
+node_modules/
+.pnp
+.pnp.*
+
+# Next.js
+.next/
+out/
+next-env.d.ts
+*.tsbuildinfo
+
+# Env and secrets
 .env
 .env.*
 !.env.example
-!portfolio/.env.example
+src/server/personal.json
+src/server/cv.tex
 
-# Python virtual environment
-venv/
-
-# Python cache
-__pycache__/
-*.pyc
-*.pyo
-
-# Editor settings
-.vscode/
-.idea/
-
-# Logs
-*.log
-
-# Generated data
-data/chroma_db/
-portfolio/.git/
-portfolio/.vercel/
-portfolio/coverage/
-portfolio/node_modules/
-portfolio/out/
-portfolio/.next/
-portfolio/npm-debug.log*
-portfolio/yarn-debug.log*
-portfolio/yarn-error.log*
-portfolio/.pnpm-debug.log*
-
-# Docker image tarball (built locally, uploaded to VPS)
-image
-
-# Sensitive information  
-messages/
+# Legacy Python paths (removed from the app)
+data/
 data/personal.json
 data/cv.tex
-credentials.txt
-for_github.json
+data/chroma_db/
+
+# Logs and OS
+*.log
+.DS_Store
+
+# Local artifacts
+coverage/
+.vercel/
+image/
+out/
+.export-api-park/
+*.pem

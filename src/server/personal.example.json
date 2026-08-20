@@ -1,0 +1,15 @@
+{
+  "basic_identity": {
+    "full_name": "Your Name",
+    "current_role": "Your role",
+    "location": "Your city",
+    "email": "you@example.com",
+    "phone": "+0000000000",
+    "website": "https://example.com"
+  },
+  "key_facts": ["Short facts the chatbot should know."],
+  "experience": [],
+  "education": [],
+  "projects": [],
+  "technical_skills": {}
+}

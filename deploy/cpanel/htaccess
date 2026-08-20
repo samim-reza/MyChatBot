@@ -1,0 +1,14 @@
+# CloudLinux / LiteSpeed Node.js (Passenger)
+PassengerEnabled On
+PassengerAppRoot "/home/banglabo/samimreza-app"
+PassengerBaseURI "/"
+PassengerAppType node
+PassengerStartupFile startup.js
+PassengerNodejs "/opt/alt/alt-nodejs20/root/usr/bin/node"
+
+Options -Indexes
+DirectoryIndex index.html
+
+RewriteEngine On
+RewriteCond %{HTTPS} !=on
+RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
