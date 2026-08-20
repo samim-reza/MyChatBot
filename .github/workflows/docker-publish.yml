@@ -2,7 +2,7 @@ name: Build and publish Docker image
 
 # GitHub builds the Docker image (Next.js + FastAPI). This cPanel host cannot
 # run Docker, so a follow-up job copies the built static site out of the image
-# and uploads it over SFTP. The server never compiles anything.
+# and uploads it through cPanel's HTTPS API. The server never compiles anything.
 on:
   push:
     branches: [master]
@@ -65,20 +65,26 @@ jobs:
           test -f site/index.html
           ls -la site
 
-      - name: Upload to cPanel over SFTP
+      - name: Upload to cPanel over HTTPS API
         env:
-          SSH_KEY: ${{ secrets.CPANEL_SSH_KEY }}
+          CPANEL_TOKEN: ${{ secrets.CPANEL_API_TOKEN }}
           CPANEL_HOST: ${{ secrets.CPANEL_HOST }}
           CPANEL_USERNAME: ${{ secrets.CPANEL_USERNAME }}
         run: |
-          install -m 700 -d "$HOME/.ssh"
-          printf '%s\n' "$SSH_KEY" > "$HOME/.ssh/deploy_key"
-          chmod 600 "$HOME/.ssh/deploy_key"
-          ssh-keyscan -H "$CPANEL_HOST" >> "$HOME/.ssh/known_hosts"
-          cd site
-          sftp -i "$HOME/.ssh/deploy_key" -o BatchMode=yes -b - "$CPANEL_USERNAME@$CPANEL_HOST" <<'EOF'
-          cd /home/banglabo/samimreza.me
-          put -r *
-          put .htaccess
-          bye
-          EOF
+          set -euo pipefail
+          (cd site && zip -qr ../site.zip .)
+          AUTH="Authorization: cpanel ${CPANEL_USERNAME}:${CPANEL_TOKEN}"
+          BASE="https://${CPANEL_HOST}:2083/execute"
+          upload=$(curl -sS --fail-with-body --connect-timeout 30 -X POST \
+            -H "$AUTH" \
+            -F "dir=/home/${CPANEL_USERNAME}/samimreza.me" \
+            -F "file-1=@site.zip" \
+            "$BASE/Fileman/upload_files")
+          echo "$upload" | python3 -c 'import json,sys; d=json.load(sys.stdin); assert d.get("status")==1, d'
+          extract=$(curl -sS --fail-with-body --connect-timeout 30 -G \
+            -H "$AUTH" \
+            --data-urlencode "op=extract" \
+            --data-urlencode "sourcefiles=/home/${CPANEL_USERNAME}/samimreza.me/site.zip" \
+            --data-urlencode "destfiles=/home/${CPANEL_USERNAME}/samimreza.me" \
+            "$BASE/Fileman/fileop")
+          echo "$extract" | python3 -c 'import json,sys; d=json.load(sys.stdin); assert d.get("status")==1, d'
