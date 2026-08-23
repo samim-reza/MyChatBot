@@ -55,10 +55,21 @@ npm start
 
 ### cPanel / LiteSpeed
 
-Shared hosting cannot reliably boot full Next.js under Passenger. Deploy as:
+Shared hosting cannot reliably boot full Next.js under Passenger, and GitHub Actions cannot reach this host. After you push, deploy from this machine. Full notes: [DEPLOY.md](DEPLOY.md).
 
-1. Static export of the site into the domain document root (`samimreza.me`)
-2. Chat API as a small Node app in `samimreza-app`, startup file `deploy/cpanel/startup.js`
-3. Copy `deploy/cpanel/htaccess` to the document root `.htaccess`
+```bash
+npm run deploy
+```
 
-Set `GROQ_API_KEY` in the Node app environment (or `.env` next to the startup file).
+That command:
+
+1. Builds the static site
+2. Uploads `out/` to `samimreza.me` (does not keep the export `.htaccess`)
+3. Restores the Passenger `.htaccess` so chat stays on Node
+4. Uploads `deploy/cpanel/startup.js` and `src/server/personal.json` to `samimreza-app`
+
+SFTP must already work with your SSH key (`banglabo@ibdix.allserverdns.com`). To upload files without rebuilding:
+
+```bash
+DEPLOY_SKIP_BUILD=1 npm run deploy
+```

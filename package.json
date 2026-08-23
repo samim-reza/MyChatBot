@@ -6,6 +6,7 @@
     "dev": "next dev",
     "build": "next build",
     "build:static": "node scripts/build-static.mjs",
+    "deploy": "node scripts/deploy-cpanel.mjs",
     "start": "NODE_ENV=production node server.js",
     "start:cpanel": "NODE_ENV=production node deploy/cpanel/startup.js",
     "lint": "next lint",

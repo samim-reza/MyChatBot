@@ -1,6 +1,6 @@
 'use client';
 
-import ChatMarkdown from '@/components/chat/ChatMarkdown';
+import ChatMessageBubble from '@/components/chat/ChatMessageBubble';
 import ChatBubbleIcon from '@/components/svgs/ChatBubbleIcon';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
@@ -16,7 +16,6 @@ import { chatSuggestions } from '@/config/ChatPrompt';
 import { heroConfig } from '@/config/Hero';
 import { useHapticFeedback } from '@/hooks/use-haptic-feedback';
 import { usePortfolioChat } from '@/hooks/use-portfolio-chat';
-import { cn } from '@/lib/utils';
 import React from 'react';
 
 import SendIcon from '../svgs/SendIcon';
@@ -77,50 +76,12 @@ const ChatBubble: React.FC = () => {
         <ScrollArea ref={scrollAreaRef} className="h-full p-4">
           <div className="space-y-4">
             {messages.map((message) => (
-              <div
+              <ChatMessageBubble
                 key={message.id}
-                className={cn(
-                  'flex w-max max-w-[min(100%,24rem)] flex-col gap-2 rounded-lg px-3 py-2 text-sm',
-                  message.sender === 'user'
-                    ? 'text-secondary bg-muted ml-auto'
-                    : 'bg-muted',
-                )}
-              >
-                <div className="flex items-start space-x-2">
-                  {message.sender === 'bot' && (
-                    <Avatar className="border-primary h-6 w-6 border-2 bg-blue-300 dark:bg-yellow-300">
-                      <AvatarImage
-                        src="/assets/samim-pixel-avatar.png"
-                        alt="Assistant"
-                      />
-                      <AvatarFallback>AI</AvatarFallback>
-                    </Avatar>
-                  )}
-                  <div className="max-w-[min(100%,24rem)] min-w-0 flex-1">
-                    <div className="prose prose-sm dark:prose-invert max-w-none">
-                      {message.text ? (
-                        <ChatMarkdown text={message.text} />
-                      ) : (
-                        message.isStreaming && (
-                          <span className="text-muted-foreground">
-                            Thinking...
-                          </span>
-                        )
-                      )}
-                    </div>
-                    <p
-                      className={cn(
-                        'mt-1 text-xs',
-                        message.sender === 'user'
-                          ? 'text-secondary'
-                          : 'text-muted-foreground',
-                      )}
-                    >
-                      {message.timestamp}
-                    </p>
-                  </div>
-                </div>
-              </div>
+                message={message}
+                showTimestamp
+                className="max-w-[min(100%,24rem)]"
+              />
             ))}
 
             {messages.length === 1 && !isLoading && (

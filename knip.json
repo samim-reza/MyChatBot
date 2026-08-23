@@ -2,7 +2,7 @@
   "$schema": "https://unpkg.com/knip@5/schema.json",
   "entry": ["src/**/*.{ts,tsx,js,jsx}"],
   "project": ["**/*.{js,cjs,mjs,jsx,ts,cts,mts,tsx}!"],
-  "ignore": ["public/oneko/oneko.js", "server.js", "deploy/**"],
+  "ignore": ["public/oneko/oneko.js", "server.js", "deploy/**", "scripts/**"],
   "ignoreDependencies": [
     "@tailwindcss/typography",
     "eslint-config-next",

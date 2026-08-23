@@ -26,7 +26,13 @@ export function autolinkText(text: string): string {
     .join('');
 }
 
-export default function ChatMarkdown({ text }: { text: string }) {
+export default function ChatMarkdown({
+  text,
+  onPrimary = false,
+}: {
+  text: string;
+  onPrimary?: boolean;
+}) {
   return (
     <ReactMarkdown
       urlTransform={(url) => url}
@@ -37,7 +43,11 @@ export default function ChatMarkdown({ text }: { text: string }) {
             href={href}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-primary font-medium break-all underline underline-offset-2 hover:opacity-80"
+            className={
+              onPrimary
+                ? 'font-medium break-all text-inherit underline underline-offset-2 hover:opacity-80'
+                : 'text-primary font-medium break-all underline underline-offset-2 hover:opacity-80'
+            }
           >
             {children}
           </a>

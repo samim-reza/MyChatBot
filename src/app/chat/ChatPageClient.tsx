@@ -1,6 +1,6 @@
 'use client';
 
-import ChatMarkdown from '@/components/chat/ChatMarkdown';
+import ChatMessageBubble from '@/components/chat/ChatMessageBubble';
 import { TrackedLink } from '@/components/common/TrackedLink';
 import SendIcon from '@/components/svgs/SendIcon';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -8,7 +8,6 @@ import { Button } from '@/components/ui/button';
 import { chatSuggestions } from '@/config/ChatPrompt';
 import { heroConfig, socialLinks } from '@/config/Hero';
 import { usePortfolioChat } from '@/hooks/use-portfolio-chat';
-import { cn } from '@/lib/utils';
 import type { KeyboardEvent } from 'react';
 
 export default function ChatPageClient() {
@@ -120,38 +119,7 @@ export default function ChatPageClient() {
 
           <div className="flex-1 space-y-4 overflow-y-auto p-5">
             {messages.map((message) => (
-              <div
-                key={message.id}
-                className={cn(
-                  'flex max-w-[85%] flex-col gap-1 rounded-lg px-3 py-2 text-sm',
-                  message.sender === 'user'
-                    ? 'bg-primary text-primary-foreground ml-auto'
-                    : 'bg-muted',
-                )}
-              >
-                <div className="flex items-start gap-2">
-                  {message.sender === 'bot' && (
-                    <Avatar className="mt-0.5 h-6 w-6 border bg-blue-300 dark:bg-yellow-300">
-                      <AvatarImage
-                        src="/assets/samim-pixel-avatar.png"
-                        alt="Assistant"
-                      />
-                      <AvatarFallback>AI</AvatarFallback>
-                    </Avatar>
-                  )}
-                  <div className="prose prose-sm dark:prose-invert min-w-0 flex-1">
-                    {message.text ? (
-                      <ChatMarkdown text={message.text} />
-                    ) : (
-                      message.isStreaming && (
-                        <span className="text-muted-foreground">
-                          Thinking...
-                        </span>
-                      )
-                    )}
-                  </div>
-                </div>
-              </div>
+              <ChatMessageBubble key={message.id} message={message} />
             ))}
             <div ref={messagesEndRef} />
           </div>
