@@ -23,6 +23,9 @@ DEPLOY_SKIP_BUILD=1 npm run deploy
 
 ## Requirements
 
-- Run this on the machine that already has SFTP to `banglabo@ibdix.allserverdns.com`
-- SSH key: `~/.ssh/id_ed25519`
+- This host blocks SSH/SFTP (port 22) on our plan, so the deploy uploads over
+  plain FTP (port 21) instead, using a dedicated "deploy" FTP account scoped
+  to the account's home directory (cPanel > Files > FTP Accounts).
+- `CPANEL_FTP_PASSWORD` (and optionally `CPANEL_FTP_USER`, default
+  `deploy@samimreza.me`) must be set in `.env` — see `.env.example`.
 - `src/server/personal.json` and Groq env must already exist locally
