@@ -14,8 +14,8 @@ export const projects: Project[] = [
     title: 'SloanCode AI Receptionist',
     description:
       'Live restaurant AI phone receptionist SaaS with AI voice workflows, CRM, menu, kitchen flow, reporting, Twilio, RAG, and OpenAI Realtime.',
-    image: '/assets/samim-pixel-avatar.png',
-    link: 'https://remitjob.com/',
+    image: '/project/autokitchen.png',
+    link: 'https://restaurant.sloancode.com/',
     technologies: [
       { name: 'FastAPI', icon: <NextJs key="fastapi" /> },
       { name: 'PostgreSQL', icon: <PostgreSQL key="postgres" /> },
@@ -24,7 +24,7 @@ export const projects: Project[] = [
       { name: 'TypeScript', icon: <TypeScript key="ts" /> },
     ],
     github: 'https://github.com/samim-reza/AutoKitchen',
-    live: 'https://remitjob.com/',
+    live: 'https://restaurant.sloancode.com/',
     details: false,
     projectDetailsPageSlug: '/projects/autokitchen',
     isWorking: true,
@@ -33,7 +33,7 @@ export const projects: Project[] = [
     title: 'TrueDoc',
     description:
       'SaaS for digital document attestation in Bangladesh with QR verification, JWT auth, and BDT payments.',
-    image: '/assets/samim-pixel-avatar.png',
+    image: '/project/truedoc.png',
     link: 'https://github.com/samim-reza/TrueDoc',
     technologies: [
       { name: 'Django', icon: <ExpressJs key="django" /> },
@@ -50,7 +50,7 @@ export const projects: Project[] = [
     title: 'GoUp',
     description:
       'Lead Ads automation platform that syncs pages and forms through Meta API webhooks, then triggers SMS follow-ups with Celery and Redis.',
-    image: '/assets/samim-pixel-avatar.png',
+    image: '/project/goup.png',
     link: 'https://github.com/samim-reza/GoUp',
     technologies: [
       { name: 'Django', icon: <ExpressJs key="django" /> },
@@ -68,7 +68,7 @@ export const projects: Project[] = [
     title: 'Personal AI Assistant',
     description:
       'LLM-powered portfolio chatbot with RAG, Groq, and ChromaDB — the assistant on this site.',
-    image: '/assets/samim-pixel-avatar.png',
+    image: '/project/mychatbot.png',
     link: 'https://samimreza.me/chat',
     technologies: [
       { name: 'FastAPI', icon: <NextJs key="fastapi" /> },
@@ -85,7 +85,7 @@ export const projects: Project[] = [
     title: 'KobitaLM',
     description:
       'Fine-tuned Gemma 2 9B with LoRA and RAG for Bengali poetry generation.',
-    image: '/assets/samim-pixel-avatar.png',
+    image: '/project/kobitalm.png',
     link: 'https://huggingface.co/samim-reza/KobitaLM',
     technologies: [
       { name: 'PyTorch', icon: <TypeScript key="pytorch" /> },
@@ -102,7 +102,7 @@ export const projects: Project[] = [
     title: 'WeCare Medical App',
     description:
       'Offline-first PWA for rural healthcare with AI-assisted triage using FastAPI and Qwen3-VL.',
-    image: '/assets/samim-pixel-avatar.png',
+    image: '/project/wecare.png',
     link: 'https://github.com/samim-reza/FutureBuilders2025_GreenU_Tensors',
     technologies: [
       { name: 'FastAPI', icon: <NextJs key="fastapi" /> },
@@ -119,7 +119,7 @@ export const projects: Project[] = [
     title: 'Cirrhosis Outcome Prediction',
     description:
       'Ensemble ML classifier using XGBoost, LightGBM, and CatBoost with 55 engineered features and a 14.5% accuracy gain.',
-    image: '/assets/samim-pixel-avatar.png',
+    image: '/project/cirrhosis-outcome-prediction.png',
     link: '#',
     technologies: [
       { name: 'XGBoost', icon: <TypeScript key="xgboost" /> },
@@ -135,7 +135,7 @@ export const projects: Project[] = [
     title: 'Hasib Academic System',
     description:
       'Production Django app for school admissions, attendance, notices, finance, and PDF export for Bangla users.',
-    image: '/assets/samim-pixel-avatar.png',
+    image: '/project/hasib.png',
     link: 'https://hasibislamicacademy.github.io/',
     technologies: [
       { name: 'Django', icon: <ExpressJs key="django" /> },
@@ -152,7 +152,7 @@ export const projects: Project[] = [
     title: 'Union Ledger',
     description:
       'Collaborative financial tracking with consensus-based voting for deposits, loans, and investments.',
-    image: '/assets/samim-pixel-avatar.png',
+    image: '/project/union.png',
     link: 'https://samim-reza.github.io/union',
     technologies: [
       { name: 'Django', icon: <ExpressJs key="django" /> },
@@ -168,7 +168,7 @@ export const projects: Project[] = [
     title: 'Mars Rover',
     description:
       'ROS-based autonomous navigation system for Mars rover simulation with embedded systems.',
-    image: '/assets/samim-pixel-avatar.png',
+    image: '/project/mars-rover.png',
     link: 'https://github.com/samim-reza/Rover-robot',
     technologies: [
       { name: 'ROS', icon: <NextJs key="ros" /> },

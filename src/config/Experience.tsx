@@ -60,7 +60,7 @@ export const experiences: Experience[] = [
         icon: <TypeScript />,
       },
     ],
-    website: 'https://remitjob.com/',
+    website: 'https://restaurant.sloancode.com/',
   },
   {
     isCurrent: true,
