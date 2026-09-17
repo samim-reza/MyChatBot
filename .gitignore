@@ -33,3 +33,6 @@ image/
 out/
 .export-api-park/
 *.pem
+
+# Deploy artifacts
+dist/

@@ -15,7 +15,7 @@ export const siteConfig = {
   description:
     'Senior AI Software Engineer and Machine Learning Engineer building AI voice products, RAG systems, and full-stack apps.',
   url: process.env.NEXT_PUBLIC_URL || 'https://samimreza.me',
-  ogImage: '/meta/opengraph-image.png',
+  ogImage: '/meta/opengraph-image-v2.png',
   author: {
     name: about.name,
     twitter: '@samimreza',
@@ -49,7 +49,7 @@ export const pageMetadata: Record<string, PageMeta> = {
       'projects',
       'developer',
     ],
-    ogImage: '/meta/hero.png',
+    ogImage: '/meta/hero-v2.png',
     twitterCard: 'summary_large_image',
   },
   '/chat': {
@@ -80,7 +80,7 @@ export const pageMetadata: Record<string, PageMeta> = {
       'ml engineer',
       'robotics',
     ],
-    ogImage: '/meta/work.png',
+    ogImage: '/meta/work-v2.png',
     twitterCard: 'summary_large_image',
   },
   '/projects': {
@@ -88,14 +88,14 @@ export const pageMetadata: Record<string, PageMeta> = {
     description:
       'AI products, SaaS platforms, ML research projects, and full-stack applications.',
     keywords: ['projects', 'AI', 'RAG', 'django', 'fastapi'],
-    ogImage: '/meta/projects.png',
+    ogImage: '/meta/projects-v2.png',
     twitterCard: 'summary_large_image',
   },
   '/resume': {
     title: 'Resume - Samim Reza',
     description: `View and download ${about.name}'s professional resume and CV.`,
     keywords: ['resume', 'cv', 'ml engineer', 'samim reza'],
-    ogImage: '/meta/resume.png',
+    ogImage: '/meta/resume-v2.png',
     twitterCard: 'summary',
   },
 };
