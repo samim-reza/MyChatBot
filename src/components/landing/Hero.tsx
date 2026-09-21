@@ -18,7 +18,8 @@ const buttonIcons = {
 };
 
 export default function Hero() {
-  const { name, title, avatar, skills, description, buttons } = heroConfig;
+  const { name, title, titleLink, avatar, skills, description, buttons } =
+    heroConfig;
 
   const renderDescription = () => {
     const parts = parseTemplate(description.template, skills);
@@ -63,7 +64,26 @@ export default function Hero() {
       {/* Text Area */}
       <div className="mt-8 flex flex-col gap-2">
         <h1 className="text-4xl font-bold">
-          Hi, I&apos;m {name} — <span className="text-secondary">{title}</span>
+          Hi, I&apos;m {name} —{' '}
+          <span className="text-secondary">
+            {title} ·{' '}
+            <TrackedLink
+              href={titleLink.href}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="underline decoration-dotted underline-offset-4 hover:decoration-solid"
+              track={{
+                name: 'external_link_click',
+                data: {
+                  url: titleLink.href,
+                  text: titleLink.text,
+                  location: 'hero_title',
+                },
+              }}
+            >
+              {titleLink.text}
+            </TrackedLink>
+          </span>
         </h1>
 
         <div className="mt-4 flex flex-wrap items-center gap-x-1.5 gap-y-2 text-base whitespace-pre-wrap text-neutral-500 md:text-lg">

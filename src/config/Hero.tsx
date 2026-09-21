@@ -21,7 +21,11 @@ export const skillComponents = {
 
 export const heroConfig = {
   name: 'Samim Reza',
-  title: 'Senior AI Software Engineer · ML Engineer.',
+  title: 'Senior AI Software Engineer · ML Engineer',
+  titleLink: {
+    text: 'Founder of Wasilah',
+    href: 'https://mywasilah.com',
+  },
   avatar: '/assets/samim-pixel-avatar.png',
   skills: [
     {

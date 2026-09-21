@@ -31,59 +31,6 @@ export interface Experience {
 export const experiences: Experience[] = [
   {
     isCurrent: true,
-    company: 'Wasilah',
-    position: 'Founder',
-    location: 'Dhaka, Bangladesh',
-    image: '/assets/samim-pixel-avatar.png',
-    description: [
-      'Founded and build Wasilah, a Quran habit app built around reading one ayah a day.',
-      'Own the streak engine that survives timezone changes, DST, offline reads, duplicate events, and device clock jumps.',
-      'Built the reminder engine and guest mode on Expo, React Native, TypeScript, and Supabase.',
-    ],
-    startDate: 'Sept 2026',
-    endDate: 'Present',
-    technologies: [
-      { name: 'React', href: 'https://react.dev/', icon: <ReactIcon /> },
-      {
-        name: 'TypeScript',
-        href: 'https://www.typescriptlang.org/',
-        icon: <TypeScript />,
-      },
-      {
-        name: 'PostgreSQL',
-        href: 'https://www.postgresql.org/',
-        icon: <PostgreSQL />,
-      },
-    ],
-    website: 'https://mywasilah.com',
-    github: 'https://github.com/samim-reza/Wasilah',
-  },
-  {
-    isCurrent: true,
-    company: 'Nuhu Labs',
-    position: 'Software Engineer',
-    location: 'Remote from Dhaka, Bangladesh',
-    image: '/assets/samim-pixel-avatar.png',
-    description: [
-      'Shipping the Linux port of Byakaron, a Bangla phonetic keyboard and companion app.',
-      'Building the input method and desktop app in C on top of the shared Zig engine.',
-      'Own the Linux packaging so the keyboard installs as a first-class system input source.',
-    ],
-    startDate: 'Aug 2026',
-    endDate: 'Present',
-    technologies: [
-      {
-        name: 'C',
-        href: 'https://en.wikipedia.org/wiki/C_(programming_language)',
-        icon: <TypeScript />,
-      },
-      { name: 'Linux', href: 'https://www.linux.org/', icon: <TailwindCss /> },
-      { name: 'Zig', href: 'https://ziglang.org/', icon: <NextJs /> },
-    ],
-    website: 'https://nuhulabs.com',
-  },
-  {
-    isCurrent: true,
     company: 'SloanCode',
     position: 'Senior AI Software Engineer',
     location: 'New York, NY, United States',
@@ -114,6 +61,30 @@ export const experiences: Experience[] = [
       },
     ],
     website: 'https://restaurant.sloancode.com/',
+  },
+  {
+    isCurrent: true,
+    company: 'Nuhu Labs',
+    position: 'Software Engineer',
+    location: 'Remote from Dhaka, Bangladesh',
+    image: '/assets/samim-pixel-avatar.png',
+    description: [
+      'Shipping the Linux port of Byakaron, a Bangla phonetic keyboard and companion app.',
+      'Building the input method and desktop app in C on top of the shared Zig engine.',
+      'Own the Linux packaging so the keyboard installs as a first-class system input source.',
+    ],
+    startDate: 'Aug 2026',
+    endDate: 'Present',
+    technologies: [
+      {
+        name: 'C',
+        href: 'https://en.wikipedia.org/wiki/C_(programming_language)',
+        icon: <TypeScript />,
+      },
+      { name: 'Linux', href: 'https://www.linux.org/', icon: <TailwindCss /> },
+      { name: 'Zig', href: 'https://ziglang.org/', icon: <NextJs /> },
+    ],
+    website: 'https://nuhulabs.com',
   },
   {
     isCurrent: false,
