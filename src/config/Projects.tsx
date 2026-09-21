@@ -30,6 +30,42 @@ export const projects: Project[] = [
     isWorking: true,
   },
   {
+    title: 'Wasilah',
+    description:
+      'Quran habit app built around one ayah a day, with a streak engine that survives timezone changes, DST, offline reads, and device clock jumps.',
+    image: '/project/wasilah.png',
+    link: 'https://mywasilah.com',
+    technologies: [
+      { name: 'React Native', icon: <ReactIcon key="react-native" /> },
+      { name: 'Expo', icon: <NodeJs key="expo" /> },
+      { name: 'TypeScript', icon: <TypeScript key="ts" /> },
+      { name: 'Supabase', icon: <PostgreSQL key="supabase" /> },
+    ],
+    github: 'https://github.com/samim-reza/Wasilah',
+    live: 'https://mywasilah.com',
+    details: false,
+    projectDetailsPageSlug: '/projects/wasilah',
+    isWorking: true,
+  },
+  {
+    title: 'BanglaBot',
+    description:
+      'AI phone agent that talks in Bengali — a streaming STT to LLM to Azure TTS cascade over Twilio Media Streams, with a disk LRU cache for repeated lines.',
+    image: '/project/banglabot.png',
+    link: 'https://github.com/samim-reza/BanglaBot',
+    technologies: [
+      { name: 'FastAPI', icon: <NextJs key="fastapi" /> },
+      { name: 'Twilio', icon: <TypeScript key="twilio" /> },
+      { name: 'Azure TTS', icon: <Vercel key="azure" /> },
+      { name: 'React', icon: <ReactIcon key="react" /> },
+    ],
+    github: 'https://github.com/samim-reza/BanglaBot',
+    live: 'https://github.com/samim-reza/BanglaBot',
+    details: false,
+    projectDetailsPageSlug: '/projects/banglabot',
+    isWorking: true,
+  },
+  {
     title: 'TrueDoc',
     description:
       'SaaS for digital document attestation in Bangladesh with QR verification, JWT auth, and BDT payments.',

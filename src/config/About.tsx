@@ -24,5 +24,5 @@ export const about = {
   name: 'Samim Reza',
   image: '/assets/samim-pixel-avatar.png',
   description:
-    "I'm a Senior AI Software Engineer at SloanCode in New York and a Machine Learning Engineer at Brandifies. I build AI voice workflows, RAG systems, ML pipelines, and full-stack apps that solve real problems. 3x ICPC Regionalist, travel lover, and always learning.",
+    "I'm a Senior AI Software Engineer at SloanCode in New York, a software engineer at Nuhu Labs, and the founder of Wasilah. I build AI voice workflows, RAG systems, ML pipelines, native Linux input methods, and full-stack apps that solve real problems. 3x ICPC Regionalist, travel lover, and always learning.",
 };

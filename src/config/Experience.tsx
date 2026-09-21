@@ -31,12 +31,65 @@ export interface Experience {
 export const experiences: Experience[] = [
   {
     isCurrent: true,
+    company: 'Wasilah',
+    position: 'Founder',
+    location: 'Dhaka, Bangladesh',
+    image: '/assets/samim-pixel-avatar.png',
+    description: [
+      'Founded and build Wasilah, a Quran habit app built around reading one ayah a day.',
+      'Own the streak engine that survives timezone changes, DST, offline reads, duplicate events, and device clock jumps.',
+      'Built the reminder engine and guest mode on Expo, React Native, TypeScript, and Supabase.',
+    ],
+    startDate: 'Sept 2026',
+    endDate: 'Present',
+    technologies: [
+      { name: 'React', href: 'https://react.dev/', icon: <ReactIcon /> },
+      {
+        name: 'TypeScript',
+        href: 'https://www.typescriptlang.org/',
+        icon: <TypeScript />,
+      },
+      {
+        name: 'PostgreSQL',
+        href: 'https://www.postgresql.org/',
+        icon: <PostgreSQL />,
+      },
+    ],
+    website: 'https://mywasilah.com',
+    github: 'https://github.com/samim-reza/Wasilah',
+  },
+  {
+    isCurrent: true,
+    company: 'Nuhu Labs',
+    position: 'Software Engineer',
+    location: 'Remote from Dhaka, Bangladesh',
+    image: '/assets/samim-pixel-avatar.png',
+    description: [
+      'Shipping the Linux port of Byakaron, a Bangla phonetic keyboard and companion app.',
+      'Building the input method and desktop app in C on top of the shared Zig engine.',
+      'Own the Linux packaging so the keyboard installs as a first-class system input source.',
+    ],
+    startDate: 'Aug 2026',
+    endDate: 'Present',
+    technologies: [
+      {
+        name: 'C',
+        href: 'https://en.wikipedia.org/wiki/C_(programming_language)',
+        icon: <TypeScript />,
+      },
+      { name: 'Linux', href: 'https://www.linux.org/', icon: <TailwindCss /> },
+      { name: 'Zig', href: 'https://ziglang.org/', icon: <NextJs /> },
+    ],
+    website: 'https://nuhulabs.com',
+  },
+  {
+    isCurrent: true,
     company: 'SloanCode',
     position: 'Senior AI Software Engineer',
     location: 'New York, NY, United States',
     image: '/assets/samim-pixel-avatar.png',
     description: [
-      'Lead engineering for a live restaurant AI phone receptionist SaaS sold in New York.',
+      'Engineer a live restaurant AI phone receptionist SaaS sold in New York.',
       'Built and own the AI voice workflow, frontend, backend, QA, CRM, menu, kitchen flow, and reporting systems.',
       'Work across OpenAI Realtime, Twilio Media Streams, RAG, restaurant operations, and production reporting workflows.',
     ],
@@ -63,7 +116,7 @@ export const experiences: Experience[] = [
     website: 'https://restaurant.sloancode.com/',
   },
   {
-    isCurrent: true,
+    isCurrent: false,
     company: 'Brandifies',
     position: 'Machine Learning Engineer',
     location: 'Dhaka, Bangladesh',
@@ -74,7 +127,7 @@ export const experiences: Experience[] = [
       'Developed predictive models using XGBoost and similar boosting algorithms.',
     ],
     startDate: 'Dec 2025',
-    endDate: 'Present',
+    endDate: 'Sept 2026',
     technologies: [
       { name: 'Python', href: 'https://www.python.org/', icon: <TypeScript /> },
       {
