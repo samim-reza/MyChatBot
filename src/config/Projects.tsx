@@ -24,6 +24,7 @@ export const projects: Project[] = [
   {
     title: 'Callisa',
     category: 'Voice AI',
+    image: '/project/callisa.jpg',
     description:
       'AI voice and chat agents for clinics, real estate, home services and e-commerce. Streaming STT, LLM and Azure TTS over Telnyx, plus web chat, WhatsApp, Messenger, SMS and calendar sync.',
     link: 'https://www.banglabot.xyz',
@@ -44,6 +45,7 @@ export const projects: Project[] = [
   {
     title: 'Wasilah',
     category: 'Mobile app',
+    image: '/project/wasilah.jpg',
     description:
       'Quran habit app built around one ayah a day, with a streak engine that survives timezone changes, DST, offline reads and device clock jumps, plus offline sync, reminders and guest mode.',
     link: 'https://mywasilah.com',
@@ -57,6 +59,7 @@ export const projects: Project[] = [
   {
     title: 'KobitaLM',
     category: 'Research',
+    image: '/project/kobitalm.jpg',
     description:
       'Gemma 2 9B fine-tuned with LoRA and RAG for Bengali poetry generation. Published at IEEE COMPAS 2026.',
     link: 'https://huggingface.co/samim-reza/KobitaLM',
@@ -70,6 +73,7 @@ export const projects: Project[] = [
   {
     title: 'IRIS',
     category: 'Research',
+    image: '/project/iris.jpg',
     description:
       'Human-in-the-loop active learning under noisy annotators, with a reliability gate and an introspection head. 285 reproducible runs on Fashion-MNIST, BloodMNIST and CIFAR-10.',
     link: 'https://github.com/samim-reza/IRIS',
@@ -83,6 +87,7 @@ export const projects: Project[] = [
   {
     title: 'Personal AI Assistant',
     category: 'LLM app',
+    image: '/project/mychatbot.jpg',
     description:
       'The assistant on this site, answering questions as me. A Next.js route streams replies from Groq with retrieval over a private profile.',
     link: 'https://samimreza.me/chat',
@@ -96,6 +101,7 @@ export const projects: Project[] = [
   {
     title: 'TrueDoc',
     category: 'SaaS',
+    image: '/project/truedoc.jpg',
     description:
       'SaaS for digital document attestation in Bangladesh with QR-backed verification, role-based access for citizens, verifiers and organizations, JWT auth and BDT payments.',
     link: 'https://github.com/samim-reza/TrueDoc',
@@ -109,6 +115,7 @@ export const projects: Project[] = [
   {
     title: 'GoUp',
     category: 'Automation',
+    image: '/project/goup.jpg',
     description:
       'Lead Ads automation platform that syncs pages and forms through Meta API webhooks, then triggers SMS follow-ups with Celery and Redis.',
     link: 'https://github.com/samim-reza/GoUp',
@@ -122,6 +129,7 @@ export const projects: Project[] = [
   {
     title: 'WeCare Medical App',
     category: 'Healthcare',
+    image: '/project/wecare.jpg',
     description:
       'Offline-first PWA for rural healthcare with AI-assisted triage running on Ollama and Qwen3-VL.',
     link: 'https://github.com/samim-reza/FutureBuilders2025_GreenU_Tensors',
@@ -135,6 +143,7 @@ export const projects: Project[] = [
   {
     title: 'Cirrhosis Outcome Prediction',
     category: 'Machine learning',
+    image: '/project/cirrhosis.jpg',
     description:
       'Ensemble ML classifier using XGBoost, LightGBM and CatBoost over 55 engineered features, with a 14.5% accuracy gain.',
     link: '#',
@@ -147,6 +156,7 @@ export const projects: Project[] = [
   {
     title: 'Hasib Academic System',
     category: 'Web app',
+    image: '/project/hasib.jpg',
     description:
       'Production Django app for school admissions, attendance, notices, finance and PDF export for Bangla users.',
     link: 'https://hasibislamicacademy.github.io/',
@@ -160,6 +170,7 @@ export const projects: Project[] = [
   {
     title: 'Union Ledger',
     category: 'Web app',
+    image: '/project/union.jpg',
     description:
       'Collaborative financial tracking with consensus-based voting for deposits, loans and investments.',
     link: 'https://samim-reza.github.io/union',
@@ -173,6 +184,7 @@ export const projects: Project[] = [
   {
     title: 'Mars Rover',
     category: 'Robotics',
+    image: '/project/mars-rover.jpg',
     description:
       'ROS-based autonomous navigation system for Mars rover simulation with embedded systems.',
     link: 'https://github.com/samim-reza/Rover-robot',
