@@ -1,10 +1,10 @@
 import { type Experience } from '@/config/Experience';
 import { cn } from '@/lib/utils';
-import Image from 'next/image';
 import Link from 'next/link';
 import React from 'react';
 
-import Skill from '../common/Skill';
+import Lamp from '../common/Lamp';
+import Tag from '../common/Tag';
 import Github from '../svgs/Github';
 import LinkedIn from '../svgs/LinkedIn';
 import Website from '../svgs/Website';
@@ -21,135 +21,90 @@ const parseDescription = (text: string): string => {
 
 export function ExperienceCard({ experience }: ExperienceCardProps) {
   const hasWebsite = Boolean(experience.website && experience.website !== '#');
+  const links = [
+    hasWebsite && {
+      href: experience.website,
+      label: 'Visit Website',
+      icon: <Website />,
+    },
+    experience.x && { href: experience.x, label: 'Follow on X', icon: <X /> },
+    experience.linkedin && {
+      href: experience.linkedin,
+      label: 'Connect on LinkedIn',
+      icon: <LinkedIn />,
+    },
+    experience.github && {
+      href: experience.github,
+      label: 'View GitHub',
+      icon: <Github />,
+    },
+  ].filter(Boolean) as { href: string; label: string; icon: React.ReactNode }[];
 
   return (
-    <div className="flex flex-col gap-4">
-      {/* Company Header */}
-      <div className="flex flex-col gap-2 md:flex-row md:justify-between">
-        {/* Left Side */}
-        <div className="flex items-center gap-4">
-          <Image
-            src={experience.image}
-            alt={experience.company}
-            width={100}
-            height={100}
-            className="size-12 rounded-md"
-          />
-          <div className="flex flex-col">
-            <div className="flex items-center gap-2">
-              <h3
-                className={cn(
-                  'text-lg font-bold',
-                  experience.isBlur ? 'blur-[5px]' : 'blur-none',
-                )}
-              >
-                {experience.company}
-              </h3>
-              {hasWebsite && (
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Link
-                      href={experience.website}
-                      target="_blank"
-                      className="size-4 text-neutral-500"
-                    >
-                      <Website />
-                    </Link>
-                  </TooltipTrigger>
-                  <TooltipContent>Visit Website</TooltipContent>
-                </Tooltip>
-              )}
-              {experience.x && (
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Link
-                      href={experience.x}
-                      target="_blank"
-                      className="size-4 text-neutral-500"
-                    >
-                      <X />
-                    </Link>
-                  </TooltipTrigger>
-                  <TooltipContent>Follow on X</TooltipContent>
-                </Tooltip>
-              )}
-              {experience.linkedin && (
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Link
-                      href={experience.linkedin}
-                      target="_blank"
-                      className="size-4 text-neutral-500"
-                    >
-                      <LinkedIn />
-                    </Link>
-                  </TooltipTrigger>
-                  <TooltipContent>Connect on LinkedIn</TooltipContent>
-                </Tooltip>
-              )}
-              {experience.github && (
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Link
-                      href={experience.github}
-                      target="_blank"
-                      className="size-4 text-neutral-500"
-                    >
-                      <Github />
-                    </Link>
-                  </TooltipTrigger>
-                  <TooltipContent>View GitHub</TooltipContent>
-                </Tooltip>
-              )}
-              {experience.isCurrent && (
-                <div className="flex items-center gap-1 rounded-md border-green-300 bg-green-500/10 px-2 py-1 text-xs">
-                  <div className="size-2 animate-pulse rounded-full bg-green-500"></div>
-                  Working
-                </div>
-              )}
-            </div>
-            <p>{experience.position}</p>
-          </div>
-        </div>
-        {/* Right Side */}
-        <div className="text-secondary flex flex-col md:text-right">
-          <p>
-            {experience.startDate} -{' '}
-            {experience.isCurrent ? 'Present' : experience.endDate}
-          </p>
-          <p>{experience.location}</p>
-        </div>
+    <article className="grid gap-3 py-6 md:grid-cols-[180px_minmax(0,1fr)] md:gap-8">
+      {/* Dates and place */}
+      <div className="text-muted-foreground flex flex-col gap-1 font-mono text-xs">
+        <p>
+          {experience.startDate} –{' '}
+          {experience.isCurrent ? 'Present' : experience.endDate}
+        </p>
+        <p className="font-sans text-[13px]">{experience.location}</p>
       </div>
 
-      {/* Technologies */}
-      <div>
-        <h4 className="text-md mt-4 mb-2 font-semibold">Technologies</h4>
-        <div className="flex flex-wrap gap-2">
-          {experience.technologies.map((technology, techIndex: number) => (
-            <Skill
-              key={techIndex}
-              name={technology.name}
-              href={technology.href}
+      <div className="flex min-w-0 flex-col gap-3">
+        <div className="flex flex-col gap-1">
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+            <h3
+              className={cn(
+                'text-lg font-bold',
+                experience.isBlur ? 'blur-[5px]' : 'blur-none',
+              )}
             >
-              {technology.icon}
-            </Skill>
+              {experience.company}
+            </h3>
+            {links.map((link) => (
+              <Tooltip key={link.label}>
+                <TooltipTrigger asChild>
+                  <Link
+                    href={link.href}
+                    target="_blank"
+                    aria-label={link.label}
+                    className="text-muted-foreground hover:text-foreground size-4 transition-colors"
+                  >
+                    {link.icon}
+                  </Link>
+                </TooltipTrigger>
+                <TooltipContent>{link.label}</TooltipContent>
+              </Tooltip>
+            ))}
+            {experience.isCurrent && (
+              <span className="text-muted-foreground flex items-center gap-2 font-mono text-[10.5px] tracking-[0.08em] uppercase">
+                <Lamp tone="live" />
+                Current
+              </span>
+            )}
+          </div>
+          <p className="font-medium">{experience.position}</p>
+        </div>
+
+        <ul className="text-muted-foreground flex max-w-[70ch] flex-col gap-1.5 text-[15px]">
+          {experience.description.map((description) => (
+            <li
+              key={description}
+              className="before:bg-border relative pl-4 before:absolute before:top-[0.6em] before:left-0 before:size-1.5 before:rounded-full"
+              dangerouslySetInnerHTML={{
+                __html: parseDescription(description),
+              }}
+            />
+          ))}
+        </ul>
+
+        <div className="flex flex-wrap gap-1.5">
+          {experience.technologies.map((technology) => (
+            <Tag key={technology}>{technology}</Tag>
           ))}
         </div>
       </div>
-
-      {/* Description */}
-      <div className="text-secondary flex flex-col">
-        {experience.description.map(
-          (description: string, descIndex: number) => (
-            <p
-              key={descIndex}
-              dangerouslySetInnerHTML={{
-                __html: `• ${parseDescription(description)}`,
-              }}
-            />
-          ),
-        )}
-      </div>
-    </div>
+    </article>
   );
 }

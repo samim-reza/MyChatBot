@@ -17,9 +17,12 @@ export function ExperienceList({ experiences }: ExperienceListProps) {
   }
 
   return (
-    <div className="flex flex-col gap-8">
+    <div className="divide-border flex flex-col divide-y">
       {experiences.map((experience: Experience) => (
-        <ExperienceCard key={experience.company} experience={experience} />
+        <ExperienceCard
+          key={`${experience.company}-${experience.position}`}
+          experience={experience}
+        />
       ))}
     </div>
   );

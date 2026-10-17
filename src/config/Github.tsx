@@ -1,8 +1,7 @@
 export const githubConfig = {
   username: 'samim-reza',
-  apiUrl: 'https://github-contributions-api.deno.dev',
-  title: 'GitHub Activity',
-  subtitle: 'coding journey over the past year',
+  apiUrl: 'https://github-contributions-api.jogruber.de/v4',
+  title: 'GitHub activity',
   blockSize: 11,
   blockMargin: 3,
   fontSize: 12,
@@ -23,21 +22,10 @@ export const githubConfig = {
   ],
   weekdays: ['', 'M', '', 'W', '', 'F', ''],
   totalCountLabel: '{{count}} contributions in the last year',
+  // Amber steps that match the site's signal color in each mode.
   theme: {
-    dark: [
-      'rgb(22, 27, 34)',
-      'rgb(14, 68, 41)',
-      'rgb(0, 109, 50)',
-      'rgb(38, 166, 65)',
-      'rgb(57, 211, 83)',
-    ],
-    light: [
-      'rgb(235, 237, 240)',
-      'rgb(155, 233, 168)',
-      'rgb(64, 196, 99)',
-      'rgb(48, 161, 78)',
-      'rgb(33, 110, 57)',
-    ],
+    dark: ['#1f2228', '#4a3510', '#7a5410', '#c4840f', '#f5a524'],
+    light: ['#e2e5ea', '#f5d9a8', '#eeb560', '#d98a14', '#a85f00'],
   },
   errorState: {
     title: 'Unable to load GitHub contributions',

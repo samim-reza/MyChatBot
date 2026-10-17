@@ -1,32 +1,20 @@
-'use client';
-
 import { projects } from '@/config/Projects';
-import Link from 'next/link';
 import React from 'react';
 
 import Container from '../common/Container';
 import SectionHeading from '../common/SectionHeading';
 import { ProjectList } from '../projects/ProjectList';
-import { Button } from '../ui/button';
 
+// The hero already features the first two projects, so this picks up after them.
 export default function Projects() {
   return (
     <Container className="mt-20">
-      <SectionHeading subHeading="Featured" heading="Projects" />
-
-      <ProjectList className="mt-8" projects={projects.slice(0, 4)} />
-      <div className="mt-8 flex justify-center">
-        <Button
-          asChild
-          variant="outline"
-          track={{
-            name: 'button_click',
-            data: { buttonId: 'show_all_projects', section: 'projects' },
-          }}
-        >
-          <Link href="/projects">Show all projects</Link>
-        </Button>
-      </div>
+      <SectionHeading
+        subHeading="More work"
+        heading="Projects"
+        link={{ href: '/projects', text: 'All projects' }}
+      />
+      <ProjectList className="mt-6" projects={projects.slice(2, 8)} />
     </Container>
   );
 }

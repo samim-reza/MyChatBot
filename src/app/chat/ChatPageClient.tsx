@@ -32,9 +32,9 @@ export default function ChatPageClient() {
       <div className="grid min-h-[calc(100dvh-10rem)] gap-6 lg:grid-cols-[280px_minmax(0,1fr)]">
         <aside className="space-y-6 lg:sticky lg:top-24 lg:self-start">
           <div className="flex items-center gap-3">
-            <Avatar className="border-primary h-12 w-12 border-2 bg-blue-300 dark:bg-yellow-300">
+            <Avatar className="border-border h-12 w-12 border">
               <AvatarImage
-                src="/assets/samim-pixel-avatar.png"
+                src="/assets/samim-avatar.jpg"
                 alt={heroConfig.name}
               />
               <AvatarFallback>SR</AvatarFallback>
@@ -112,7 +112,7 @@ export default function ChatPageClient() {
               </p>
             </div>
             <div className="text-muted-foreground hidden items-center gap-2 text-xs sm:flex">
-              <span className="h-2 w-2 animate-pulse rounded-full bg-green-500" />
+              <span className="bg-live h-2 w-2 animate-pulse rounded-full" />
               Online
             </div>
           </header>

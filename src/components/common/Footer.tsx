@@ -5,11 +5,12 @@ import Container from './Container';
 
 export default function Footer() {
   return (
-    <Container className="py-16">
-      <div className="flex flex-col items-center justify-center">
-        <p className="text-secondary text-center text-sm">
-          &copy; {new Date().getFullYear()}. {footerConfig.copyright}
+    <Container className="pb-16">
+      <div className="border-border text-muted-foreground flex flex-col items-center justify-between gap-2 border-t pt-6 font-mono text-xs sm:flex-row">
+        <p>
+          &copy; {new Date().getFullYear()} Samim Reza. {footerConfig.copyright}
         </p>
+        <p>Dhaka · New York</p>
       </div>
     </Container>
   );

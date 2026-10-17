@@ -1,5 +1,5 @@
 export const ctaConfig = {
-  profileImage: '/assets/samim-pixel-avatar.png',
+  profileImage: '/assets/samim-avatar.jpg',
   profileAlt: 'Samim Reza',
   linkText: 'Email Me',
   email: 'samimreza2111@gmail.com',

@@ -1,12 +1,15 @@
-import { heroConfig, skillComponents, socialLinks } from '@/config/Hero';
-import { parseTemplate } from '@/lib/hero';
+import { heroConfig, socialLinks } from '@/config/Hero';
+import { projects } from '@/config/Projects';
+import { type Project } from '@/types/project';
 import Image from 'next/image';
 import Link from 'next/link';
 import React from 'react';
 
 import Container from '../common/Container';
-import Skill from '../common/Skill';
+import Lamp from '../common/Lamp';
 import { TrackedLink } from '../common/TrackedLink';
+import Waveform from '../common/Waveform';
+import { ProjectCover } from '../projects/ProjectCover';
 import CV from '../svgs/CV';
 import Chat from '../svgs/Chat';
 import { Button } from '../ui/button';
@@ -17,132 +20,218 @@ const buttonIcons = {
   Chat: Chat,
 };
 
-export default function Hero() {
-  const { name, title, titleLink, avatar, skills, description, buttons } =
-    heroConfig;
+const tile = 'bg-card border-border min-w-0 rounded-2xl border p-5';
+const label =
+  'text-muted-foreground flex items-center gap-2 font-mono text-[10.5px] tracking-[0.08em] uppercase';
 
-  const renderDescription = () => {
-    const parts = parseTemplate(description.template, skills);
-
-    return parts.map((part) => {
-      if (part.type === 'skill' && 'skill' in part && part.skill) {
-        const SkillComponent =
-          skillComponents[part.skill.component as keyof typeof skillComponents];
-        return (
-          <Skill key={part.key} name={part.skill.name} href={part.skill.href}>
-            <SkillComponent />
-          </Skill>
-        );
-      } else if (part.type === 'bold' && 'text' in part) {
-        return (
-          <b key={part.key} className="text-primary whitespace-pre-wrap">
-            {part.text}
-          </b>
-        );
-      } else if (part.type === 'text' && 'text' in part) {
-        return (
-          <span key={part.key} className="whitespace-pre-wrap">
-            {part.text}
+function FeaturedProject({ project }: { project: Project }) {
+  return (
+    <TrackedLink
+      href={project.link}
+      target="_blank"
+      rel="noopener noreferrer"
+      className={`${tile} group hover:border-primary/50 flex flex-col gap-3 p-3 transition-colors md:col-span-2`}
+      track={{
+        name: 'external_link_click',
+        data: { url: project.link, text: project.title, location: 'hero_tile' },
+      }}
+    >
+      {project.image ? (
+        <Image
+          src={project.image}
+          alt={project.title}
+          width={1200}
+          height={600}
+          priority
+          className="border-border aspect-video w-full rounded-xl border object-cover object-top-left"
+        />
+      ) : (
+        <ProjectCover project={project} />
+      )}
+      <div className="flex flex-col gap-1 px-2 pb-2">
+        <h3 className="flex items-center justify-between gap-2 font-bold">
+          {project.title}
+          <span className="text-muted-foreground group-hover:text-primary transition-colors">
+            ↗
           </span>
-        );
-      }
-      return null;
-    });
-  };
+        </h3>
+        <p className="text-muted-foreground line-clamp-2 text-sm">
+          {project.description}
+        </p>
+      </div>
+    </TrackedLink>
+  );
+}
+
+export default function Hero() {
+  const {
+    name,
+    location,
+    avatar,
+    role,
+    company,
+    companyCity,
+    founderOf,
+    summary,
+    callStack,
+    now,
+    buttons,
+  } = heroConfig;
 
   return (
-    <Container className="mx-auto max-w-5xl">
-      {/* Image */}
-      <Image
-        src={avatar}
-        alt="Samim Reza"
-        width={100}
-        height={100}
-        className="size-24 rounded-full bg-blue-300 object-cover object-top dark:bg-yellow-300"
-      />
+    <Container>
+      <section className="grid grid-cols-1 gap-3 md:grid-cols-6">
+        {/* Intro */}
+        <div className={`${tile} flex flex-col gap-5 md:col-span-4 md:p-7`}>
+          <div className="flex items-center gap-4">
+            <Image
+              src={avatar}
+              alt={name}
+              width={128}
+              height={128}
+              priority
+              className="border-border size-16 rounded-2xl border object-cover"
+            />
+            <span className={label}>
+              <Lamp tone="live" />
+              {location}
+            </span>
+          </div>
 
-      {/* Text Area */}
-      <div className="mt-8 flex flex-col gap-2">
-        <h1 className="text-4xl font-bold">
-          Hi, I&apos;m {name} —{' '}
-          <span className="text-secondary">
-            {title} ·{' '}
-            <TrackedLink
-              href={titleLink.href}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="underline decoration-dotted underline-offset-4 hover:decoration-solid"
-              track={{
-                name: 'external_link_click',
-                data: {
-                  url: titleLink.href,
-                  text: titleLink.text,
-                  location: 'hero_title',
-                },
-              }}
-            >
-              {titleLink.text}
-            </TrackedLink>
-          </span>
-        </h1>
+          <div className="flex flex-col gap-3">
+            <h1 className="text-4xl font-extrabold tracking-tight md:text-5xl">
+              {name}
+            </h1>
+            <p className="text-muted-foreground max-w-[60ch] text-base md:text-lg">
+              <b className="text-foreground font-bold">{role}</b> at {company},{' '}
+              {companyCity}. Founder of{' '}
+              {founderOf.map((f, i) => (
+                <React.Fragment key={f.name}>
+                  {i > 0 && ' and '}
+                  <TrackedLink
+                    href={f.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-foreground decoration-primary underline decoration-2 underline-offset-4"
+                    track={{
+                      name: 'external_link_click',
+                      data: {
+                        url: f.href,
+                        text: f.name,
+                        location: 'hero_title',
+                      },
+                    }}
+                  >
+                    {f.name}
+                  </TrackedLink>
+                </React.Fragment>
+              ))}
+              . {summary}
+            </p>
+          </div>
 
-        <div className="mt-4 flex flex-wrap items-center gap-x-1.5 gap-y-2 text-base whitespace-pre-wrap text-neutral-500 md:text-lg">
-          {renderDescription()}
+          <div className="flex flex-wrap items-center gap-3">
+            {buttons.map((button) => {
+              const IconComponent =
+                buttonIcons[button.icon as keyof typeof buttonIcons];
+              return (
+                <Button
+                  key={button.text}
+                  asChild
+                  variant={button.variant as 'outline' | 'default'}
+                  track={{
+                    name: 'button_click',
+                    data: { buttonId: button.text, section: 'hero' },
+                  }}
+                >
+                  <Link href={button.href}>
+                    {IconComponent && <IconComponent />}
+                    {button.text}
+                  </Link>
+                </Button>
+              );
+            })}
+            <div className="ml-1 flex gap-3">
+              {socialLinks.map((link) => (
+                <Tooltip key={link.name} delayDuration={0}>
+                  <TooltipTrigger asChild>
+                    <TrackedLink
+                      href={link.href}
+                      aria-label={link.name}
+                      className="text-muted-foreground hover:text-foreground flex items-center transition-colors"
+                      track={{
+                        name: 'external_link_click',
+                        data: {
+                          url: link.href,
+                          text: link.name,
+                          location: 'hero_social',
+                        },
+                      }}
+                    >
+                      <span className="size-5">{link.icon}</span>
+                    </TrackedLink>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>{link.name}</p>
+                  </TooltipContent>
+                </Tooltip>
+              ))}
+            </div>
+          </div>
         </div>
-      </div>
 
-      {/* Buttons */}
-      <div className="mt-8 flex gap-4">
-        {buttons.map((button, index) => {
-          const IconComponent =
-            buttonIcons[button.icon as keyof typeof buttonIcons];
-          return (
-            <Button
-              key={index}
-              asChild
-              variant={button.variant as 'outline' | 'default'}
-              className="inset-shadow-indigo-500"
-              track={{
-                name: 'button_click',
-                data: { buttonId: button.text, section: 'hero' },
-              }}
-            >
-              <Link href={button.href}>
-                {IconComponent && <IconComponent />}
-                {button.text}
-              </Link>
-            </Button>
-          );
-        })}
-      </div>
+        {/* Live call */}
+        <div className={`${tile} flex flex-col gap-4 md:col-span-2`}>
+          <span className={label}>
+            <Lamp />
+            On the line
+          </span>
+          <Waveform bars={34} className="my-auto h-24" />
+          <div className="flex flex-col gap-1">
+            <p className="font-mono text-[11.5px]">{callStack.join(' → ')}</p>
+            <p className="text-muted-foreground text-xs">
+              The call path behind SloanCode&apos;s AI receptionist.
+            </p>
+          </div>
+        </div>
 
-      {/* Social Links */}
-      <div className="mt-8 flex gap-2">
-        {socialLinks.map((link) => (
-          <Tooltip key={link.name} delayDuration={0}>
-            <TooltipTrigger asChild>
-              <TrackedLink
-                href={link.href}
-                key={link.name}
-                className="text-secondary flex items-center gap-2"
-                track={{
-                  name: 'external_link_click',
-                  data: {
-                    url: link.href,
-                    text: link.name,
-                    location: 'hero_social',
-                  },
-                }}
-              >
-                <span className="size-6">{link.icon}</span>
-              </TrackedLink>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>{link.name}</p>
-            </TooltipContent>
-          </Tooltip>
+        {/* Now */}
+        <div className={`${tile} flex flex-col gap-3 md:col-span-2`}>
+          <span className={label}>Now</span>
+          <ul className="flex flex-col gap-3">
+            {now.map((item) => (
+              <li key={item.name}>
+                <TrackedLink
+                  href={item.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="group grid grid-cols-[auto_1fr] items-center gap-x-3"
+                  track={{
+                    name: 'external_link_click',
+                    data: {
+                      url: item.href,
+                      text: item.name,
+                      location: 'hero_now',
+                    },
+                  }}
+                >
+                  <Lamp tone="live" />
+                  <b className="group-hover:text-primary font-bold transition-colors">
+                    {item.name}
+                  </b>
+                  <span className="text-muted-foreground col-start-2 text-[13px]">
+                    {item.detail}
+                  </span>
+                </TrackedLink>
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        {projects.slice(0, 2).map((project) => (
+          <FeaturedProject key={project.title} project={project} />
         ))}
-      </div>
+      </section>
     </Container>
   );
 }

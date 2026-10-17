@@ -28,8 +28,8 @@ export default function ChatMessageBubble({
     >
       <div className="flex items-start gap-2">
         {!isUser && (
-          <Avatar className="mt-0.5 h-6 w-6 shrink-0 border bg-blue-300 dark:bg-yellow-300">
-            <AvatarImage src="/assets/samim-pixel-avatar.png" alt="Assistant" />
+          <Avatar className="mt-0.5 h-6 w-6 shrink-0 border">
+            <AvatarImage src="/assets/samim-avatar.jpg" alt="Assistant" />
             <AvatarFallback>AI</AvatarFallback>
           </Avatar>
         )}

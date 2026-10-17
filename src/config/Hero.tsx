@@ -1,80 +1,48 @@
-import Code from '@/components/svgs/Code';
 import Github from '@/components/svgs/Github';
 import LinkedIn from '@/components/svgs/LinkedIn';
 import Mail from '@/components/svgs/Mail';
-import JavaScript from '@/components/technologies/JavaScript';
-import Python from '@/components/technologies/JavaScript';
-import NextJs from '@/components/technologies/NextJs';
-import NodeJs from '@/components/technologies/NodeJs';
-import PostgreSQL from '@/components/technologies/PostgreSQL';
-
-const ConceptIcon = () => <Code className="size-4" />;
-
-export const skillComponents = {
-  NextJs: NextJs,
-  PostgreSQL: PostgreSQL,
-  NodeJs: NodeJs,
-  JavaScript: JavaScript,
-  Python: Python,
-  ConceptIcon: ConceptIcon,
-};
 
 export const heroConfig = {
   name: 'Samim Reza',
-  title: 'Senior AI Software Engineer · ML Engineer',
-  titleLink: {
-    text: 'Founder of Wasilah',
-    href: 'https://mywasilah.com',
-  },
-  avatar: '/assets/samim-pixel-avatar.png',
-  skills: [
-    {
-      name: 'Python',
-      href: 'https://www.python.org/',
-      component: 'Python',
-    },
-    {
-      name: 'ML',
-      href: 'https://en.wikipedia.org/wiki/Machine_learning',
-      component: 'ConceptIcon',
-    },
-    {
-      name: 'FastAPI',
-      href: 'https://fastapi.tiangolo.com/',
-      component: 'NextJs',
-    },
-    {
-      name: 'PostgreSQL',
-      href: 'https://www.postgresql.org/',
-      component: 'PostgreSQL',
-    },
-    {
-      name: 'RAG',
-      href: 'https://en.wikipedia.org/wiki/Retrieval-augmented_generation',
-      component: 'ConceptIcon',
-    },
-    {
-      name: 'LLM Agents',
-      href: 'https://en.wikipedia.org/wiki/Intelligent_agent',
-      component: 'ConceptIcon',
-    },
+  title: 'Senior AI Software Engineer',
+  location: 'Dhaka, Bangladesh',
+  avatar: '/assets/samim-avatar.jpg',
+  role: 'Senior AI Software Engineer',
+  company: 'SloanCode',
+  companyCity: 'New York',
+  founderOf: [
+    { name: 'Callisa', href: 'https://www.banglabot.xyz' },
+    { name: 'Wasilah', href: 'https://mywasilah.com' },
   ],
-  description: {
-    template:
-      'I work as a <b>Senior AI Software Engineer</b> on a restaurant AI phone receptionist SaaS in New York and build ML pipelines, RAG systems, and full-stack products with {skills:0}, {skills:1}, {skills:2}, {skills:3}, and {skills:4}.',
-  },
+  summary: 'I build voice agents, RAG systems and ML pipelines.',
+  // The live call path behind the SloanCode receptionist.
+  callStack: ['Twilio', 'OpenAI Realtime', 'FastAPI'],
+  now: [
+    {
+      name: 'SloanCode',
+      detail: 'Senior AI Software Engineer',
+      href: 'https://restaurant.sloancode.com/',
+    },
+    {
+      name: 'Nuhu Labs',
+      detail: 'Byakaron for Linux',
+      href: 'https://nuhulabs.com',
+    },
+    { name: 'Callisa', detail: 'Founder', href: 'https://www.banglabot.xyz' },
+    { name: 'Wasilah', detail: 'Founder', href: 'https://mywasilah.com' },
+  ],
   buttons: [
     {
-      variant: 'outline',
-      text: 'Resume / CV',
-      href: '/resume',
-      icon: 'CV',
+      variant: 'default',
+      text: 'Talk to my AI',
+      href: '/chat',
+      icon: 'Chat',
     },
     {
-      variant: 'default',
-      text: 'Get in touch',
-      href: '/contact',
-      icon: 'Chat',
+      variant: 'outline',
+      text: 'Resume',
+      href: '/resume',
+      icon: 'CV',
     },
   ],
 };

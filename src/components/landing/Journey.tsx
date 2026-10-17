@@ -9,9 +9,9 @@ import { Card } from '../ui/card';
 
 export default function Journey() {
   return (
-    <Container className="mt-10">
-      <SectionHeading subHeading="My" heading="Journey" />
-      <div className="mt-8 flex flex-col gap-4">
+    <Container className="mt-20">
+      <SectionHeading subHeading="Milestones" heading="Journey" />
+      <div className="mt-6 grid gap-3 sm:grid-cols-2">
         {journeyItems.map((item) => (
           <TrackedLink
             className="group"
@@ -26,8 +26,8 @@ export default function Journey() {
               },
             }}
           >
-            <Card className="flex flex-row items-center justify-between gap-4 px-4 py-2">
-              <div className="bg-muted flex items-center justify-center rounded-md p-2">
+            <Card className="group-hover:border-primary/50 flex flex-row items-center justify-between gap-4 rounded-2xl px-4 py-3 shadow-none transition-colors">
+              <div className="bg-muted text-primary flex items-center justify-center rounded-lg p-2">
                 {(() => {
                   const Icon = item.icon as React.ComponentType<{
                     className?: string;

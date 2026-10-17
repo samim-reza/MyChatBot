@@ -1,5 +1,7 @@
 import Container from '@/components/common/Container';
-import CertificatesGallery from '@/components/journey/CertificatesGallery';
+import CertificatesGallery, {
+  type Certificate,
+} from '@/components/journey/CertificatesGallery';
 import { Separator } from '@/components/ui/separator';
 import { certificates as configuredCertificates } from '@/config/Achievements';
 import { generateMetadata as getMetadata } from '@/config/Meta';
@@ -16,12 +18,7 @@ export const metadata: Metadata = {
 export default function CertificatesPage() {
   // Server-side: auto-discover certificate images placed under public/certificates
   const certDir = path.join(process.cwd(), 'public', 'certificates');
-  let discovered: {
-    file: string;
-    title?: string;
-    issuer?: string;
-    date?: string;
-  }[] = [];
+  let discovered: Certificate[] = [];
   try {
     if (fs.existsSync(certDir)) {
       const files = fs.readdirSync(certDir);
@@ -43,17 +40,12 @@ export default function CertificatesPage() {
   const configured = Array.isArray(configuredCertificates)
     ? configuredCertificates
     : [];
-  // Build map to avoid duplicates by file path
-  const map = new Map<
-    string,
-    { file: string; title?: string; issuer?: string; date?: string }
-  >();
-  configured.forEach(
-    (c: { file: string; title?: string; issuer?: string; date?: string }) =>
-      map.set(c.file, c),
-  );
+  // Build map to avoid duplicates; configured entries may have no image, so
+  // fall back to the title as their identity.
+  const map = new Map<string, Certificate>();
+  configured.forEach((c: Certificate) => map.set(c.file ?? c.title ?? '', c));
   discovered.forEach((d) => {
-    if (!map.has(d.file)) map.set(d.file, d);
+    if (d.file && !map.has(d.file)) map.set(d.file, d);
   });
 
   const allCertificates = Array.from(map.values());

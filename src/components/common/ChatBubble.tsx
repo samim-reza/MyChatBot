@@ -54,8 +54,8 @@ const ChatBubble: React.FC = () => {
     >
       <ExpandableChatHeader>
         <div className="flex items-center space-x-3">
-          <Avatar className="border-primary h-8 w-8 border-2 bg-blue-300 dark:bg-yellow-300">
-            <AvatarImage src="/assets/samim-pixel-avatar.png" alt="Assistant" />
+          <Avatar className="border-border h-8 w-8 border">
+            <AvatarImage src="/assets/samim-avatar.jpg" alt="Assistant" />
             <AvatarFallback>AI</AvatarFallback>
           </Avatar>
           <div>
@@ -64,7 +64,7 @@ const ChatBubble: React.FC = () => {
             </h3>
             <div className="text-muted-foreground text-xs">
               <div className="flex items-center gap-1">
-                <div className="h-2 w-2 animate-pulse rounded-full bg-green-500"></div>
+                <div className="bg-live h-2 w-2 animate-pulse rounded-full"></div>
                 Online
               </div>
             </div>

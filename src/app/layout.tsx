@@ -9,8 +9,21 @@ import WelcomeGreeting from '@/components/common/WelcomeGreeting';
 import { Toaster } from '@/components/ui/sonner';
 import { generateMetadata as getMetadata, siteConfig } from '@/config/Meta';
 import ReactLenis from 'lenis/react';
+import { Geist_Mono, Schibsted_Grotesk } from 'next/font/google';
 
 import './globals.css';
+
+const sans = Schibsted_Grotesk({
+  subsets: ['latin'],
+  variable: '--font-schibsted',
+  display: 'swap',
+});
+
+const mono = Geist_Mono({
+  subsets: ['latin'],
+  variable: '--font-geist-mono',
+  display: 'swap',
+});
 
 export const metadata = getMetadata('/');
 
@@ -33,15 +46,19 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <body className={`font-hanken-grotesk antialiased`}>
+    <html
+      lang="en"
+      className={`${sans.variable} ${mono.variable}`}
+      suppressHydrationWarning
+    >
+      <body className="font-sans antialiased">
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(personJsonLd) }}
         />
         <ThemeProvider
           attribute="class"
-          defaultTheme="system"
+          defaultTheme="dark"
           enableSystem
           disableTransitionOnChange
         >

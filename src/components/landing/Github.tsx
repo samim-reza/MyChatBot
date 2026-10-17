@@ -7,6 +7,7 @@ import Link from 'next/link';
 import { useEffect, useState } from 'react';
 
 import Container from '../common/Container';
+import SectionHeading from '../common/SectionHeading';
 import GithubIcon from '../svgs/Github';
 import { Button } from '../ui/button';
 
@@ -21,89 +22,42 @@ type ContributionItem = {
   level: 0 | 1 | 2 | 3 | 4;
 };
 
+// The API already returns just the last year of contributions.
 type GitHubContributionResponse = {
-  date: string;
-  contributionCount: number;
-  contributionLevel:
-    | 'NONE'
-    | 'FIRST_QUARTILE'
-    | 'SECOND_QUARTILE'
-    | 'THIRD_QUARTILE'
-    | 'FOURTH_QUARTILE';
+  total?: { lastYear?: number };
+  contributions?: ContributionItem[];
 };
-
-// Helper function to filter contributions to past year
-function filterLastYear(contributions: ContributionItem[]): ContributionItem[] {
-  const oneYearAgo = new Date();
-  oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
-
-  return contributions.filter((item) => {
-    const itemDate = new Date(item.date);
-    return itemDate >= oneYearAgo;
-  });
-}
 
 export default function Github() {
   const [contributions, setContributions] = useState<ContributionItem[]>([]);
   const [totalContributions, setTotalContributions] = useState<number>(0);
   const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
-  const { theme } = useTheme();
+  const { resolvedTheme } = useTheme();
 
   useEffect(() => {
     async function fetchData() {
       try {
         setIsLoading(true);
         const response = await fetch(
-          `${githubConfig.apiUrl}/${githubConfig.username}.json`,
+          `${githubConfig.apiUrl}/${githubConfig.username}?y=last`,
         );
-        const data: { contributions?: unknown[] } = await response.json();
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        const data: GitHubContributionResponse = await response.json();
+        const valid = (data.contributions ?? []).filter(
+          (item) =>
+            typeof item?.date === 'string' &&
+            typeof item?.count === 'number' &&
+            item.level >= 0 &&
+            item.level <= 4,
+        );
 
-        if (data?.contributions && Array.isArray(data.contributions)) {
-          // Flatten the nested array structure
-          const flattenedContributions = data.contributions.flat();
-
-          // Convert contribution levels to numbers
-          const contributionLevelMap = {
-            NONE: 0,
-            FIRST_QUARTILE: 1,
-            SECOND_QUARTILE: 2,
-            THIRD_QUARTILE: 3,
-            FOURTH_QUARTILE: 4,
-          };
-
-          // Transform to the expected format
-          const validContributions = flattenedContributions
-            .filter(
-              (item: unknown): item is GitHubContributionResponse =>
-                typeof item === 'object' &&
-                item !== null &&
-                'date' in item &&
-                'contributionCount' in item &&
-                'contributionLevel' in item,
-            )
-            .map((item: GitHubContributionResponse) => ({
-              date: String(item.date),
-              count: Number(item.contributionCount || 0),
-              level: (contributionLevelMap[
-                item.contributionLevel as keyof typeof contributionLevelMap
-              ] || 0) as ContributionItem['level'],
-            }));
-
-          if (validContributions.length > 0) {
-            // Calculate total contributions
-            const total = validContributions.reduce(
-              (sum, item) => sum + item.count,
-              0,
-            );
-            setTotalContributions(total);
-
-            // Filter to show only the past year
-            const filteredContributions = filterLastYear(validContributions);
-            setContributions(filteredContributions);
-          } else {
-            setHasError(true);
-          }
+        if (valid.length > 0) {
+          setTotalContributions(
+            data.total?.lastYear ??
+              valid.reduce((sum, item) => sum + item.count, 0),
+          );
+          setContributions(valid);
         } else {
           setHasError(true);
         }
@@ -122,24 +76,16 @@ export default function Github() {
     <Container className="mt-20">
       <div className="space-y-6">
         {/* Header */}
-        <div className="flex items-center justify-between">
-          <div>
-            <h2 className="text-foreground text-2xl font-bold">
-              {githubConfig.title}
-            </h2>
-            <p className="text-muted-foreground text-sm">
-              <b>{githubConfig.username}</b>&apos;s {githubConfig.subtitle}
+        <div className="flex flex-wrap items-end justify-between gap-4">
+          <SectionHeading subHeading="Code" heading={githubConfig.title} />
+          {!isLoading && !hasError && totalContributions > 0 && (
+            <p className="text-muted-foreground font-mono text-xs">
+              <span className="text-foreground font-medium">
+                {totalContributions.toLocaleString()}
+              </span>{' '}
+              contributions · {githubConfig.username}
             </p>
-            {!isLoading && !hasError && totalContributions > 0 && (
-              <p className="text-primary mt-1 text-sm font-medium">
-                Total:{' '}
-                <span className="font-black">
-                  {totalContributions.toLocaleString()}
-                </span>{' '}
-                contributions
-              </p>
-            )}
-          </div>
+          )}
         </div>
 
         {/* Content */}
@@ -153,7 +99,7 @@ export default function Github() {
             </div>
           </div>
         ) : hasError || contributions.length === 0 ? (
-          <div className="text-muted-foreground border-border rounded-xl border-2 border-dashed p-8 text-center">
+          <div className="text-muted-foreground bg-card border-border rounded-2xl border p-8 text-center">
             <div className="bg-muted mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full">
               <GithubIcon className="h-8 w-8" />
             </div>
@@ -184,14 +130,14 @@ export default function Github() {
           </div>
         ) : (
           <div className="relative overflow-hidden">
-            <div className="bg-background/50 relative rounded-lg border border-dashed border-black/20 p-6 backdrop-blur-sm dark:border-white/10">
+            <div className="bg-card border-border relative rounded-2xl border p-6">
               <div className="w-full overflow-x-auto">
                 <ActivityCalendar
                   data={contributions}
                   blockSize={12}
                   blockMargin={4}
                   fontSize={githubConfig.fontSize}
-                  colorScheme={theme === 'dark' ? 'dark' : 'light'}
+                  colorScheme={resolvedTheme === 'dark' ? 'dark' : 'light'}
                   maxLevel={githubConfig.maxLevel}
                   hideTotalCount={true}
                   hideColorLegend={false}
@@ -203,7 +149,7 @@ export default function Github() {
                     totalCount: githubConfig.totalCountLabel,
                   }}
                   style={{
-                    color: 'rgb(139, 148, 158)',
+                    color: 'var(--muted-foreground)',
                   }}
                 />
               </div>

@@ -25,7 +25,7 @@ export default function BackToTop() {
         <Button
           variant="outline"
           size="icon"
-          className="fixed right-10 bottom-4 z-50 bg-white hover:cursor-pointer md:right-20 dark:bg-black"
+          className="bg-card fixed right-10 bottom-4 z-50 hover:cursor-pointer md:right-20"
           onClick={handleClick}
           track={{
             name: 'button_click',

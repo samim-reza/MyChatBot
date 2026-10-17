@@ -1,11 +1,12 @@
 export interface NavItem {
   label: string;
   href: string;
+  hideOnMobile?: boolean;
 }
 
 export const navbarConfig = {
   logo: {
-    src: '/assets/samim-pixel-avatar.png',
+    src: '/assets/samim-avatar.jpg',
     alt: 'Samim Reza',
     width: 100,
     height: 100,
@@ -18,6 +19,11 @@ export const navbarConfig = {
     {
       label: 'Projects',
       href: '/projects',
+    },
+    {
+      label: 'Research',
+      href: '/#research',
+      hideOnMobile: true,
     },
     {
       label: 'Chat',

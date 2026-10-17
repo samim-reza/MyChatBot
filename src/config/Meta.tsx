@@ -13,9 +13,9 @@ export const siteConfig = {
   name: heroConfig.name,
   title: 'Samim Reza — Portfolio',
   description:
-    'Senior AI Software Engineer and Machine Learning Engineer building AI voice products, RAG systems, and full-stack apps.',
+    'Senior AI Software Engineer building AI voice agents, RAG systems, ML pipelines, and full-stack apps. Founder of Callisa and Wasilah.',
   url: process.env.NEXT_PUBLIC_URL || 'https://samimreza.me',
-  ogImage: '/meta/opengraph-image-v2.png',
+  ogImage: '/meta/opengraph-image-v3.png',
   author: {
     name: about.name,
     twitter: '@samimreza',
@@ -49,7 +49,7 @@ export const pageMetadata: Record<string, PageMeta> = {
       'projects',
       'developer',
     ],
-    ogImage: '/meta/hero-v2.png',
+    ogImage: '/meta/hero-v3.png',
     twitterCard: 'summary_large_image',
   },
   '/chat': {
@@ -57,7 +57,7 @@ export const pageMetadata: Record<string, PageMeta> = {
     description:
       "Chat with Samim Reza's portfolio assistant about work, projects, education, and how to get in touch.",
     keywords: ['chat', 'ai assistant', 'portfolio', 'samim reza'],
-    ogImage: '/assets/samim-pixel-avatar.png',
+    ogImage: '/assets/samim-avatar.jpg',
     twitterCard: 'summary',
   },
   '/contact': {
@@ -65,37 +65,38 @@ export const pageMetadata: Record<string, PageMeta> = {
     description:
       'Get in touch with Samim for collaborations, projects, or opportunities.',
     keywords: ['contact', 'hire', 'collaboration', 'ml engineer'],
-    ogImage: '/assets/samim-pixel-avatar.png',
+    ogImage: '/assets/samim-avatar.jpg',
     twitterCard: 'summary',
   },
   '/work-experience': {
     title: 'Work Experience - Professional Journey',
     description:
-      'Professional work experience across SloanCode, Brandifies, robotics, and teaching.',
+      'Professional work experience across SloanCode, Nuhu Labs, Brandifies, robotics, and teaching.',
     keywords: [
       'work experience',
       'senior ai software engineer',
       'sloancode',
+      'nuhu labs',
       'brandifies',
       'ml engineer',
       'robotics',
     ],
-    ogImage: '/meta/work-v2.png',
+    ogImage: '/meta/work-v3.png',
     twitterCard: 'summary_large_image',
   },
   '/projects': {
     title: 'Projects - Portfolio',
     description:
-      'AI products, SaaS platforms, ML research projects, and full-stack applications.',
-    keywords: ['projects', 'AI', 'RAG', 'django', 'fastapi'],
-    ogImage: '/meta/projects-v2.png',
+      'Voice AI products, SaaS platforms, ML research, and full-stack applications, including Callisa, Wasilah, KobitaLM, and IRIS.',
+    keywords: ['projects', 'AI', 'voice AI', 'RAG', 'fastapi', 'callisa'],
+    ogImage: '/meta/projects-v3.png',
     twitterCard: 'summary_large_image',
   },
   '/resume': {
     title: 'Resume - Samim Reza',
     description: `View and download ${about.name}'s professional resume and CV.`,
     keywords: ['resume', 'cv', 'ml engineer', 'samim reza'],
-    ogImage: '/meta/resume-v2.png',
+    ogImage: '/meta/resume-v3.png',
     twitterCard: 'summary',
   },
 };

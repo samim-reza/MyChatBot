@@ -1,10 +1,13 @@
 export interface Project {
   title: string;
   description: string;
-  image: string;
+  // Short label shown on the drawn cover, e.g. 'Voice AI' or 'Research'.
+  category: string;
+  // A real screenshot. Without one the card draws a cover instead.
+  image?: string;
   video?: string;
   link: string;
-  technologies: { name: string; icon: React.ReactNode }[];
+  technologies: string[];
   github?: string;
   live: string;
   details: boolean;

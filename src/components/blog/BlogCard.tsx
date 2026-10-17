@@ -27,7 +27,7 @@ export function BlogCard({ post }: BlogCardProps) {
   });
 
   return (
-    <Card className="group h-full w-full overflow-hidden border-gray-100 p-0 shadow-none transition-all dark:border-gray-800">
+    <Card className="group h-full w-full overflow-hidden rounded-2xl p-0 shadow-none transition-all">
       <CardHeader className="p-0">
         <div className="relative aspect-video overflow-hidden">
           <TrackedLink

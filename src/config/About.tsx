@@ -1,28 +1,52 @@
-import JavaScript from '@/components/technologies/JavaScript';
-import NextJs from '@/components/technologies/NextJs';
-import NodeJs from '@/components/technologies/NodeJs';
-import PostgreSQL from '@/components/technologies/PostgreSQL';
-import Prisma from '@/components/technologies/Prisma';
-import ReactIcon from '@/components/technologies/ReactIcon';
-import TailwindCss from '@/components/technologies/TailwindCss';
-import TypeScript from '@/components/technologies/TypeScript';
-import Vercel from '@/components/technologies/Vercel';
-
-export const mySkills = [
-  <ReactIcon key="react" />,
-  <JavaScript key="javascript" />,
-  <TypeScript key="typescript" />,
-  <NextJs key="nextjs" />,
-  <NodeJs key="nodejs" />,
-  <PostgreSQL key="postgresql" />,
-  <Prisma key="prisma" />,
-  <TailwindCss key="tailwind" />,
-  <Vercel key="vercel" />,
-];
-
 export const about = {
   name: 'Samim Reza',
-  image: '/assets/samim-pixel-avatar.png',
+  image: '/assets/samim.jpg',
   description:
-    "I'm a Senior AI Software Engineer at SloanCode in New York, a software engineer at Nuhu Labs, and the founder of Wasilah. I build AI voice workflows, RAG systems, ML pipelines, native Linux input methods, and full-stack apps that solve real problems. 3x ICPC Regionalist, travel lover, and always learning.",
+    "I'm a Senior AI Software Engineer at SloanCode in New York and a software engineer at Nuhu Labs, and I founded Callisa and Wasilah. I build AI voice agents, RAG systems, ML pipelines, native Linux input methods, and full-stack apps that solve real problems. 3x ICPC Regionalist with two papers at IEEE COMPAS 2026, a travel lover, and always learning.",
 };
+
+// Grouped the same way as the CV's technical skills.
+export const skillGroups = [
+  {
+    label: 'Voice AI',
+    skills: [
+      'OpenAI Realtime',
+      'Twilio',
+      'Telnyx',
+      'Azure TTS',
+      'Tool-calling agents',
+    ],
+  },
+  {
+    label: 'AI / ML',
+    skills: [
+      'PyTorch',
+      'TensorFlow',
+      'Scikit-learn',
+      'LangChain',
+      'RAG',
+      'Vector DBs',
+    ],
+  },
+  {
+    label: 'Web & mobile',
+    skills: [
+      'FastAPI',
+      'Django',
+      'Next.js',
+      'React',
+      'React Native',
+      'Expo',
+      'PostgreSQL',
+      'Supabase',
+    ],
+  },
+  {
+    label: 'Languages',
+    skills: ['Python', 'TypeScript', 'C', 'C++', 'Java', 'Zig'],
+  },
+  {
+    label: 'Systems',
+    skills: ['Linux', 'IBus', 'Fcitx5', 'Docker', 'Redis', 'Celery', 'Stripe'],
+  },
+];

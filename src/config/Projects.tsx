@@ -1,46 +1,53 @@
-import ExpressJs from '@/components/technologies/ExpressJs';
-import Github from '@/components/technologies/Github';
-import MongoDB from '@/components/technologies/MongoDB';
-import NextJs from '@/components/technologies/NextJs';
-import NodeJs from '@/components/technologies/NodeJs';
-import PostgreSQL from '@/components/technologies/PostgreSQL';
-import ReactIcon from '@/components/technologies/ReactIcon';
-import TypeScript from '@/components/technologies/TypeScript';
-import Vercel from '@/components/technologies/Vercel';
 import { Project } from '@/types/project';
 
 export const projects: Project[] = [
   {
     title: 'SloanCode AI Receptionist',
+    category: 'Voice AI',
     description:
-      'Live restaurant AI phone receptionist SaaS with AI voice workflows, CRM, menu, kitchen flow, reporting, Twilio, RAG, and OpenAI Realtime.',
-    image: '/project/autokitchen.png',
+      'Live, multi-tenant AI phone receptionist for New York restaurants and home services, with OpenAI Realtime voice over Twilio, CRM, kitchen flow, Toast/Square/Clover POS and Stripe.',
+    image: '/project/sloancode.png',
     link: 'https://restaurant.sloancode.com/',
     technologies: [
-      { name: 'FastAPI', icon: <NextJs key="fastapi" /> },
-      { name: 'PostgreSQL', icon: <PostgreSQL key="postgres" /> },
-      { name: 'React', icon: <ReactIcon key="react" /> },
-      { name: 'Redis', icon: <MongoDB key="redis" /> },
-      { name: 'TypeScript', icon: <TypeScript key="ts" /> },
+      'OpenAI Realtime',
+      'Twilio',
+      'FastAPI',
+      'Redis',
+      'PostgreSQL',
+      'Next.js',
     ],
-    github: 'https://github.com/samim-reza/AutoKitchen',
     live: 'https://restaurant.sloancode.com/',
     details: false,
-    projectDetailsPageSlug: '/projects/autokitchen',
+    projectDetailsPageSlug: '/projects/sloancode',
+    isWorking: true,
+  },
+  {
+    title: 'Callisa',
+    category: 'Voice AI',
+    description:
+      'AI voice and chat agents for clinics, real estate, home services and e-commerce. Streaming STT, LLM and Azure TTS over Telnyx, plus web chat, WhatsApp, Messenger, SMS and calendar sync.',
+    link: 'https://www.banglabot.xyz',
+    technologies: [
+      'FastAPI',
+      'PostgreSQL',
+      'Redis',
+      'Telnyx',
+      'Azure TTS',
+      'Next.js',
+    ],
+    github: 'https://github.com/samim-reza/BanglaBot',
+    live: 'https://www.banglabot.xyz',
+    details: false,
+    projectDetailsPageSlug: '/projects/callisa',
     isWorking: true,
   },
   {
     title: 'Wasilah',
+    category: 'Mobile app',
     description:
-      'Quran habit app built around one ayah a day, with a streak engine that survives timezone changes, DST, offline reads, and device clock jumps.',
-    image: '/project/wasilah.png',
+      'Quran habit app built around one ayah a day, with a streak engine that survives timezone changes, DST, offline reads and device clock jumps, plus offline sync, reminders and guest mode.',
     link: 'https://mywasilah.com',
-    technologies: [
-      { name: 'React Native', icon: <ReactIcon key="react-native" /> },
-      { name: 'Expo', icon: <NodeJs key="expo" /> },
-      { name: 'TypeScript', icon: <TypeScript key="ts" /> },
-      { name: 'Supabase', icon: <PostgreSQL key="supabase" /> },
-    ],
+    technologies: ['Expo', 'React Native', 'TypeScript', 'Supabase'],
     github: 'https://github.com/samim-reza/Wasilah',
     live: 'https://mywasilah.com',
     details: false,
@@ -48,34 +55,51 @@ export const projects: Project[] = [
     isWorking: true,
   },
   {
-    title: 'BanglaBot',
+    title: 'KobitaLM',
+    category: 'Research',
     description:
-      'AI phone agent that talks in Bengali — a streaming STT to LLM to Azure TTS cascade over Twilio Media Streams, with a disk LRU cache for repeated lines.',
-    image: '/project/banglabot.png',
-    link: 'https://github.com/samim-reza/BanglaBot',
-    technologies: [
-      { name: 'FastAPI', icon: <NextJs key="fastapi" /> },
-      { name: 'Twilio', icon: <TypeScript key="twilio" /> },
-      { name: 'Azure TTS', icon: <Vercel key="azure" /> },
-      { name: 'React', icon: <ReactIcon key="react" /> },
-    ],
-    github: 'https://github.com/samim-reza/BanglaBot',
-    live: 'https://github.com/samim-reza/BanglaBot',
+      'Gemma 2 9B fine-tuned with LoRA and RAG for Bengali poetry generation. Published at IEEE COMPAS 2026.',
+    link: 'https://huggingface.co/samim-reza/KobitaLM',
+    technologies: ['PyTorch', 'Gemma 2', 'LoRA', 'RAG'],
+    github: 'https://github.com/samim-reza/KobitaLM',
+    live: 'https://huggingface.co/samim-reza/KobitaLM',
     details: false,
-    projectDetailsPageSlug: '/projects/banglabot',
+    projectDetailsPageSlug: '/projects/kobitalm',
+    isWorking: true,
+  },
+  {
+    title: 'IRIS',
+    category: 'Research',
+    description:
+      'Human-in-the-loop active learning under noisy annotators, with a reliability gate and an introspection head. 285 reproducible runs on Fashion-MNIST, BloodMNIST and CIFAR-10.',
+    link: 'https://github.com/samim-reza/IRIS',
+    technologies: ['PyTorch', 'Python', 'Active learning'],
+    github: 'https://github.com/samim-reza/IRIS',
+    live: 'https://github.com/samim-reza/IRIS',
+    details: false,
+    projectDetailsPageSlug: '/projects/iris',
+    isWorking: true,
+  },
+  {
+    title: 'Personal AI Assistant',
+    category: 'LLM app',
+    description:
+      'The assistant on this site, answering questions as me. A Next.js route streams replies from Groq with retrieval over a private profile.',
+    link: 'https://samimreza.me/chat',
+    technologies: ['Next.js', 'TypeScript', 'Groq', 'RAG'],
+    github: 'https://github.com/samim-reza/MyChatBot',
+    live: 'https://samimreza.me/chat',
+    details: false,
+    projectDetailsPageSlug: '/projects/mychatbot',
     isWorking: true,
   },
   {
     title: 'TrueDoc',
+    category: 'SaaS',
     description:
-      'SaaS for digital document attestation in Bangladesh with QR verification, JWT auth, and BDT payments.',
-    image: '/project/truedoc.png',
+      'SaaS for digital document attestation in Bangladesh with QR-backed verification, role-based access for citizens, verifiers and organizations, JWT auth and BDT payments.',
     link: 'https://github.com/samim-reza/TrueDoc',
-    technologies: [
-      { name: 'Django', icon: <ExpressJs key="django" /> },
-      { name: 'React', icon: <ReactIcon key="react" /> },
-      { name: 'PostgreSQL', icon: <PostgreSQL key="postgres" /> },
-    ],
+    technologies: ['Django', 'React', 'PostgreSQL'],
     github: 'https://github.com/samim-reza/TrueDoc',
     live: 'https://github.com/samim-reza/TrueDoc',
     details: false,
@@ -84,16 +108,11 @@ export const projects: Project[] = [
   },
   {
     title: 'GoUp',
+    category: 'Automation',
     description:
       'Lead Ads automation platform that syncs pages and forms through Meta API webhooks, then triggers SMS follow-ups with Celery and Redis.',
-    image: '/project/goup.png',
     link: 'https://github.com/samim-reza/GoUp',
-    technologies: [
-      { name: 'Django', icon: <ExpressJs key="django" /> },
-      { name: 'Celery', icon: <NodeJs key="celery" /> },
-      { name: 'Redis', icon: <MongoDB key="redis" /> },
-      { name: 'Twilio', icon: <TypeScript key="twilio" /> },
-    ],
+    technologies: ['Django', 'Celery', 'Redis', 'Twilio'],
     github: 'https://github.com/samim-reza/GoUp',
     live: 'https://github.com/samim-reza/GoUp',
     details: false,
@@ -101,50 +120,12 @@ export const projects: Project[] = [
     isWorking: true,
   },
   {
-    title: 'Personal AI Assistant',
-    description:
-      'LLM-powered portfolio chatbot with RAG, Groq, and ChromaDB — the assistant on this site.',
-    image: '/project/mychatbot.png',
-    link: 'https://samimreza.me/chat',
-    technologies: [
-      { name: 'FastAPI', icon: <NextJs key="fastapi" /> },
-      { name: 'ChromaDB', icon: <MongoDB key="chroma" /> },
-      { name: 'Groq', icon: <TypeScript key="groq" /> },
-    ],
-    github: 'https://github.com/samim-reza/MyChatBot',
-    live: 'https://samimreza.me/chat',
-    details: false,
-    projectDetailsPageSlug: '/projects/mychatbot',
-    isWorking: true,
-  },
-  {
-    title: 'KobitaLM',
-    description:
-      'Fine-tuned Gemma 2 9B with LoRA and RAG for Bengali poetry generation.',
-    image: '/project/kobitalm.png',
-    link: 'https://huggingface.co/samim-reza/KobitaLM',
-    technologies: [
-      { name: 'PyTorch', icon: <TypeScript key="pytorch" /> },
-      { name: 'LoRA', icon: <NextJs key="lora" /> },
-      { name: 'HuggingFace', icon: <Github key="hf" /> },
-    ],
-    github: 'https://github.com/samim-reza/KobitaLM',
-    live: 'https://huggingface.co/samim-reza/KobitaLM',
-    details: false,
-    projectDetailsPageSlug: '/projects/kobitalm',
-    isWorking: true,
-  },
-  {
     title: 'WeCare Medical App',
+    category: 'Healthcare',
     description:
-      'Offline-first PWA for rural healthcare with AI-assisted triage using FastAPI and Qwen3-VL.',
-    image: '/project/wecare.png',
+      'Offline-first PWA for rural healthcare with AI-assisted triage running on Ollama and Qwen3-VL.',
     link: 'https://github.com/samim-reza/FutureBuilders2025_GreenU_Tensors',
-    technologies: [
-      { name: 'FastAPI', icon: <NextJs key="fastapi" /> },
-      { name: 'PWA', icon: <ReactIcon key="pwa" /> },
-      { name: 'AI Triage', icon: <TypeScript key="ai" /> },
-    ],
+    technologies: ['FastAPI', 'Ollama', 'Qwen3-VL', 'MySQL', 'PWA'],
     github: 'https://github.com/samim-reza/FutureBuilders2025_GreenU_Tensors',
     live: 'https://github.com/samim-reza/FutureBuilders2025_GreenU_Tensors',
     details: false,
@@ -153,15 +134,11 @@ export const projects: Project[] = [
   },
   {
     title: 'Cirrhosis Outcome Prediction',
+    category: 'Machine learning',
     description:
-      'Ensemble ML classifier using XGBoost, LightGBM, and CatBoost with 55 engineered features and a 14.5% accuracy gain.',
-    image: '/project/cirrhosis-outcome-prediction.png',
+      'Ensemble ML classifier using XGBoost, LightGBM and CatBoost over 55 engineered features, with a 14.5% accuracy gain.',
     link: '#',
-    technologies: [
-      { name: 'XGBoost', icon: <TypeScript key="xgboost" /> },
-      { name: 'LightGBM', icon: <NextJs key="lightgbm" /> },
-      { name: 'CatBoost', icon: <NodeJs key="catboost" /> },
-    ],
+    technologies: ['XGBoost', 'LightGBM', 'CatBoost'],
     live: '#',
     details: false,
     projectDetailsPageSlug: '/projects/cirrhosis-outcome-prediction',
@@ -169,15 +146,11 @@ export const projects: Project[] = [
   },
   {
     title: 'Hasib Academic System',
+    category: 'Web app',
     description:
-      'Production Django app for school admissions, attendance, notices, finance, and PDF export for Bangla users.',
-    image: '/project/hasib.png',
+      'Production Django app for school admissions, attendance, notices, finance and PDF export for Bangla users.',
     link: 'https://hasibislamicacademy.github.io/',
-    technologies: [
-      { name: 'Django', icon: <ExpressJs key="django" /> },
-      { name: 'PostgreSQL', icon: <PostgreSQL key="postgres" /> },
-      { name: 'Render', icon: <Vercel key="render" /> },
-    ],
+    technologies: ['Django', 'PostgreSQL', 'Render'],
     github: 'https://github.com/samim-reza/Hasib_School',
     live: 'https://hasibislamicacademy.github.io/',
     details: false,
@@ -186,14 +159,11 @@ export const projects: Project[] = [
   },
   {
     title: 'Union Ledger',
+    category: 'Web app',
     description:
-      'Collaborative financial tracking with consensus-based voting for deposits, loans, and investments.',
-    image: '/project/union.png',
+      'Collaborative financial tracking with consensus-based voting for deposits, loans and investments.',
     link: 'https://samim-reza.github.io/union',
-    technologies: [
-      { name: 'Django', icon: <ExpressJs key="django" /> },
-      { name: 'PostgreSQL', icon: <PostgreSQL key="postgres" /> },
-    ],
+    technologies: ['Django', 'PostgreSQL'],
     github: 'https://github.com/samim-reza/union',
     live: 'https://samim-reza.github.io/union',
     details: false,
@@ -202,15 +172,11 @@ export const projects: Project[] = [
   },
   {
     title: 'Mars Rover',
+    category: 'Robotics',
     description:
       'ROS-based autonomous navigation system for Mars rover simulation with embedded systems.',
-    image: '/project/mars-rover.png',
     link: 'https://github.com/samim-reza/Rover-robot',
-    technologies: [
-      { name: 'ROS', icon: <NextJs key="ros" /> },
-      { name: 'C++', icon: <TypeScript key="cpp" /> },
-      { name: 'Embedded', icon: <NodeJs key="embedded" /> },
-    ],
+    technologies: ['ROS', 'C++', 'Embedded'],
     github: 'https://github.com/samim-reza/Rover-robot',
     live: 'https://github.com/samim-reza/Rover-robot',
     details: false,

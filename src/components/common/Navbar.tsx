@@ -8,44 +8,44 @@ import { TrackedLink } from './TrackedLink';
 
 export default function Navbar() {
   return (
-    <Container className="bg-background/70 sticky top-0 z-20 rounded-md py-4 backdrop-blur-md">
-      <div className="flex items-center justify-between px-6">
-        <div className="flex items-baseline gap-4">
-          <TrackedLink
-            href="/"
-            track={{
-              name: 'button_click',
-              data: { buttonId: 'logo', section: 'navbar' },
-            }}
-          >
-            <Image
-              className="h-12 w-12 rounded-md border border-gray-200 bg-blue-300 object-cover object-top transition-all duration-300 ease-in-out hover:scale-90 dark:bg-yellow-300"
-              src={navbarConfig.logo.src}
-              alt={navbarConfig.logo.alt}
-              width={navbarConfig.logo.width}
-              height={navbarConfig.logo.height}
-            />
-          </TrackedLink>
-          <div className="flex items-center justify-center gap-4">
-            {navbarConfig.navItems.map((item) => (
-              <TrackedLink
-                className="transition-all duration-300 ease-in-out hover:underline hover:decoration-2 hover:underline-offset-4"
-                key={item.label}
-                href={item.href}
-                track={{
-                  name: 'button_click',
-                  data: { buttonId: item.label, section: 'navbar' },
-                }}
-              >
-                {item.label}
-              </TrackedLink>
-            ))}
-          </div>
-        </div>
-        <div className="flex items-center gap-4">
+    <header className="bg-background/80 border-border/60 sticky top-0 z-20 border-b backdrop-blur-md">
+      <Container className="flex h-16 items-center justify-between gap-4">
+        <TrackedLink
+          href="/"
+          className="flex items-center gap-3 font-bold"
+          track={{
+            name: 'button_click',
+            data: { buttonId: 'logo', section: 'navbar' },
+          }}
+        >
+          <Image
+            className="border-border size-8 rounded-lg border object-cover"
+            src={navbarConfig.logo.src}
+            alt={navbarConfig.logo.alt}
+            width={navbarConfig.logo.width}
+            height={navbarConfig.logo.height}
+          />
+          <span className="hidden sm:inline">Samim Reza</span>
+        </TrackedLink>
+        <nav className="flex items-center gap-4 sm:gap-6">
+          {navbarConfig.navItems.map((item) => (
+            <TrackedLink
+              className={`text-muted-foreground hover:text-foreground text-sm font-medium transition-colors ${
+                item.hideOnMobile ? 'hidden sm:inline' : ''
+              }`}
+              key={item.label}
+              href={item.href}
+              track={{
+                name: 'button_click',
+                data: { buttonId: item.label, section: 'navbar' },
+              }}
+            >
+              {item.label}
+            </TrackedLink>
+          ))}
           <ThemeToggleButton variant="circle" start="top-right" blur />
-        </div>
-      </div>
-    </Container>
+        </nav>
+      </Container>
+    </header>
   );
 }
